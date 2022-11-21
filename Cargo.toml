@@ -1,0 +1,21 @@
+[package]
+name = "leaf-wasm"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.0.26", features = ["derive"] }
+hyper = { version = "0.14.23", features = ["full"] }
+lazy_static = "1.4.0"
+log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
+time = "0.3.17"
+tokio = { version = "1.22.0", features = ["full"] }
+tracing = { version = "0.1.37", features = ["max_level_debug", "release_max_level_info"] }
+tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
+
+[build-dependencies]
+vergen = "7.4.2"
+
+[[bin]]
+name = "leaf-cli"
+path = "src/main.rs"
