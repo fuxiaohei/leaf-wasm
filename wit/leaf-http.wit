@@ -1,0 +1,40 @@
+interface exports {
+
+    // status code
+    type status = u16
+
+    // headers as key value pairs
+    type headers = list<tuple<string, string>>
+
+    // request uri
+    type uri = string
+
+    // body as bytes
+    type body = list<u8>
+
+    // request method
+    type method = string
+
+    // request object
+    record request{
+        method: method,
+        uri: uri,
+        headers: headers,
+        body: option<body>,
+    }
+
+    // response object
+    record response{
+        status: status,
+        headers: headers,
+        body: option<body>,
+    }
+
+    // handle request function
+    handle-request: func(req: request) -> response
+}
+
+// world imports and exports
+world leaf-http {
+  default export exports
+}

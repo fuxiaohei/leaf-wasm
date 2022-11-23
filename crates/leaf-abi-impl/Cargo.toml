@@ -1,0 +1,11 @@
+[package]
+name = "leaf-abi-impl"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+
+[lib]
+crate-type = ["cdylib"]

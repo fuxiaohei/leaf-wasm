@@ -1,7 +1,8 @@
 [package]
 name = "leaf-wasm"
-version = "0.1.0"
-edition = "2021"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
 
 [dependencies]
 clap = { version = "4.0.26", features = ["derive"] }
@@ -19,3 +20,13 @@ vergen = "7.4.2"
 [[bin]]
 name = "leaf-cli"
 path = "src/main.rs"
+
+[workspace]
+members=[
+    "crates/leaf-abi-impl",
+]
+
+[workspace.package]
+version = "0.1.0"
+authors = ["fuxiaohei<fudong0797@gmail.com>"]
+edition = "2021"
