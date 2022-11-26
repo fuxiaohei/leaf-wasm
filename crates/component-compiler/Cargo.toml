@@ -1,0 +1,10 @@
+[package]
+name = "component-compiler"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = "1.0.66"
+thiserror = "1.0.37"
+wit-component = "0.3.2"
