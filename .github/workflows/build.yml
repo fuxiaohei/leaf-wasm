@@ -22,7 +22,7 @@ jobs:
           cargo --version --verbose
           rustc --version
           cargo clippy --version
-          
+
       - uses: Swatinem/rust-cache@v2
 
       - name: Build
@@ -30,6 +30,6 @@ jobs:
           cargo run --release help
           cargo run --release -- --version
 
-      - name: Build ABI impl
+      - name: Test ABI impl
         run: |
-          cargo build -p "leaf-abi-impl" --release --target wasm32-unknown-unknown
+          cargo test --test integration --release

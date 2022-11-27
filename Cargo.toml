@@ -17,6 +17,9 @@ tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
 [build-dependencies]
 vergen = "7.4.2"
 
+[dev-dependencies]
+component-compiler = { path = "./crates/component-compiler" }
+
 [[bin]]
 name = "leaf-cli"
 path = "src/main.rs"
