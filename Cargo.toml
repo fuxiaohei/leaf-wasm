@@ -27,6 +27,7 @@ path = "src/main.rs"
 [workspace]
 members=[
     "crates/leaf-abi-impl",
+    "crates/leaf-sdk-impl",
     "crates/component-compiler",
 ]
 
