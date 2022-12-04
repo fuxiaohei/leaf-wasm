@@ -1,11 +1,8 @@
+use bytes::Bytes;
+use leaf_sdk::http::{Request, Response};
 use std::str::FromStr;
 
-use bytes::Bytes;
-
 wit_bindgen_guest_rust::generate!("../../wit/leaf-http.wit");
-
-pub type Request = http::Request<Option<bytes::Bytes>>;
-pub type Response = http::Response<Option<bytes::Bytes>>;
 
 fn handle_sdk_http(req: Request) -> Response {
     let url = req.uri();

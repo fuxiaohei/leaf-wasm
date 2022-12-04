@@ -2,6 +2,8 @@ use clap::Parser;
 use lazy_static::lazy_static;
 mod cmd;
 mod server;
+mod vars;
+mod errors;
 
 fn build_info() -> String {
     format!(
@@ -56,12 +58,10 @@ enum LeafCli {
 #[tokio::main]
 async fn main() {
     init_tracing();
-    
+
     let args = LeafCli::parse();
     match args {
-        LeafCli::New(cmd) => {
-            println!("New command: {:?}", cmd);
-        }
+        LeafCli::New(cmd) => cmd.run().await,
         LeafCli::Compile(cmd) => {
             println!("Compile command: {:?}", cmd);
         }

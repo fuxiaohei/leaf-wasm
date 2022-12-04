@@ -5,14 +5,22 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
+anyhow = "1.0.66"
 clap = { version = "4.0.26", features = ["derive"] }
+futures = "0.3.25"
 hyper = { version = "0.14.23", features = ["full"] }
 lazy_static = "1.4.0"
 log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
+serde = "1.0.148"
+serde_derive = "1.0.148"
+thiserror = "1.0.37"
 time = "0.3.17"
 tokio = { version = "1.22.0", features = ["full"] }
+toml = "0.5.9"
 tracing = { version = "0.1.37", features = ["max_level_debug", "release_max_level_info"] }
 tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
+wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model"] }
+wit-bindgen-host-wasmtime-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 
 [build-dependencies]
 vergen = "7.4.2"
@@ -25,10 +33,13 @@ name = "leaf-cli"
 path = "src/main.rs"
 
 [workspace]
-members=[
-    "crates/leaf-abi-impl",
-    "crates/leaf-sdk-impl",
+members =[
     "crates/component-compiler",
+    "crates/leaf-abi-impl",
+    "crates/leaf-sdk",
+    "crates/leaf-sdk-impl",
+    "crates/leaf-sdk-macro",
+    "sample"
 ]
 
 [workspace.package]

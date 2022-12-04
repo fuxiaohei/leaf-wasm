@@ -1,0 +1,1 @@
+wit_bindgen_host_wasmtime_rust::generate!("./wit/leaf-http.wit");

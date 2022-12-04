@@ -1,5 +1,5 @@
 [package]
-name = "leaf-sdk-impl"
+name = "sample"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
@@ -8,7 +8,8 @@ edition = { workspace = true }
 anyhow = "1.0.66"
 bytes = "1.3.0"
 http = "0.2.8"
-leaf-sdk = { path = "../leaf-sdk" }
+leaf-sdk = { path = "../crates/leaf-sdk"}
+leaf-sdk-macro = { path = "../crates/leaf-sdk-macro"}
 wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 
 [lib]
