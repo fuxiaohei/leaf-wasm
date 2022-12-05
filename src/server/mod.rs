@@ -4,13 +4,6 @@ use std::net::SocketAddr;
 
 mod service;
 
-mod wasm;
-pub use wasm::ComponentContext;
-pub use wasm::ComponentPool;
-
-mod wit;
-pub use wit::LeafHttp;
-
 pub async fn start(addr: SocketAddr, wasm: String) {
     let svc = match service::ServerContext::new(wasm) {
         Ok(svc) => svc,

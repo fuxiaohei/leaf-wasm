@@ -32,9 +32,9 @@ pub struct Manifest {
 impl Manifest {
     /// from_file reads the manifest file and returns a Manifest struct
     pub fn from_file(file: &str) -> Result<Manifest, Error> {
-        let content = std::fs::read_to_string(file).map_err(Error::ReadManifestFile)?;
-        let manifest: Manifest =
-            toml::from_str(&content).map_err(Error::UnmarshalManifestToml)?;
+        let content = std::fs::read_to_string(file)
+            .map_err(|e| Error::ReadManifestFile(e, String::from(file)))?;
+        let manifest: Manifest = toml::from_str(&content).map_err(Error::UnmarshalManifestToml)?;
         Ok(manifest)
     }
 }

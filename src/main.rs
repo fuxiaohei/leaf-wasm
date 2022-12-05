@@ -1,9 +1,10 @@
 use clap::Parser;
 use lazy_static::lazy_static;
 mod cmd;
+mod errors;
 mod server;
 mod vars;
-mod errors;
+mod wasm;
 
 fn build_info() -> String {
     format!(

@@ -1,19 +1,24 @@
 use crate::errors::Error;
-use tokio::sync::{Mutex, MutexGuard, Notify};
 use wasmtime::{
     component::{Component, Instance, Linker},
     Config, Engine, Store,
 };
 
-pub struct ComponentContext {
+pub struct Worker {
     pub engine: Engine,
     pub component: Component,
-    instance: Instance,
-    store: Store<()>,
-    exports: super::LeafHttp,
+    pub instance: Instance,
+    pub store: Store<()>,
+    pub exports: super::LeafHttp,
 }
 
-impl ComponentContext {
+impl std::fmt::Debug for Worker {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
+        f.debug_struct("Worker").finish()
+    }
+}
+
+impl Worker {
     pub fn new(path: &str) -> Result<Self, Error> {
         let config = create_wasmtime_config();
         let engine = Engine::new(&config).map_err(Error::InitEngine)?;
@@ -39,28 +44,4 @@ fn create_wasmtime_config() -> Config {
     let mut config = Config::new();
     config.wasm_component_model(true);
     config
-}
-
-pub struct ComponentPool {
-    values: Mutex<ComponentContext>,
-    notify: Notify,
-}
-
-impl ComponentPool {
-    pub fn new(path: &str) -> Result<Self, Error> {
-        let values = ComponentContext::new(path)?;
-        Ok(Self {
-            values: Mutex::new(values),
-            notify: Notify::new(),
-        })
-    }
-
-    pub async fn get(&self) -> Result<MutexGuard<ComponentContext>, Error> {
-        let value = self.values.lock().await;
-        Ok(value)
-    }
-
-    pub fn put(&self) {
-        self.notify.notify_one();
-    }
 }
