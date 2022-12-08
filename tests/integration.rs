@@ -13,7 +13,12 @@ fn run_leaf_abi_exports_test() {
         .arg("wasm32-unknown-unknown")
         .output()
         .expect("failed to build leaf-abi-impl");
-    println!("status: {}", result.status);
+    if result.status.code().unwrap() != 0 {
+        println!("status: {}", result.status);
+        println!("stdout: {}", String::from_utf8_lossy(&result.stdout));
+        println!("stderr: {}", String::from_utf8_lossy(&result.stderr));
+        assert_eq!(result.status.code().unwrap(), 0)
+    }
 
     let target_file = "target/wasm32-unknown-unknown/release/leaf_abi_impl.wasm";
     // check target file exist
@@ -44,7 +49,12 @@ fn run_leaf_sdk_exports_test() {
         .arg("wasm32-unknown-unknown")
         .output()
         .expect("failed to build leaf-sdk-impl");
-    println!("status: {}", result.status);
+    if result.status.code().unwrap() != 0 {
+        println!("status: {}", result.status);
+        println!("stdout: {}", String::from_utf8_lossy(&result.stdout));
+        println!("stderr: {}", String::from_utf8_lossy(&result.stderr));
+        assert_eq!(result.status.code().unwrap(), 0)
+    }
 
     let target_file = "target/wasm32-unknown-unknown/release/leaf_sdk_impl.wasm";
     // check target file exist
@@ -74,8 +84,13 @@ fn run_sample_exports_test() {
         .arg("--target")
         .arg("wasm32-unknown-unknown")
         .output()
-        .expect("failed to build leaf-sdk-impl");
-    println!("status: {}", result.status);
+        .expect("failed to build sample");
+    if result.status.code().unwrap() != 0 {
+        println!("status: {}", result.status);
+        println!("stdout: {}", String::from_utf8_lossy(&result.stdout));
+        println!("stderr: {}", String::from_utf8_lossy(&result.stderr));
+        assert_eq!(result.status.code().unwrap(), 0)
+    }
 
     let target_file = "target/wasm32-unknown-unknown/release/sample.wasm";
     // check target file exist

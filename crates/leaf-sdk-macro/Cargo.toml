@@ -10,7 +10,7 @@ bytes = "1.3.0"
 http = "0.2.8"
 leaf-sdk = { path = "../leaf-sdk" }
 quote = "1.0.21"
-syn = "1.0.105"
+syn = { version = "1.0.105", features = ["full"] }
 wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 
 [lib]

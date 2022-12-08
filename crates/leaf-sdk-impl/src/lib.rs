@@ -69,9 +69,33 @@ struct HttpImpl;
 
 impl leaf_http::LeafHttp for HttpImpl {
     fn handle_request(req: leaf_http::Request) -> leaf_http::Response {
-        let http_req: Request = req.try_into().unwrap();
+        let http_req: Request = match req.try_into() {
+            Ok(r) => r,
+            Err(e) => {
+                return leaf_http::Response {
+                    status: 500,
+                    headers: vec![],
+                    body: Some(
+                        format!("Request Convert Error: {:?}", e)
+                            .as_bytes()
+                            .to_vec(),
+                    ),
+                }
+            }
+        };
         let http_resp = handle_sdk_http(http_req);
-        http_resp.try_into().unwrap()
+        match http_resp.try_into() {
+            Ok(r) => r,
+            Err(e) => leaf_http::Response {
+                status: 500,
+                headers: vec![],
+                body: Some(
+                    format!("Response Convert Error: {:?}", e)
+                        .as_bytes()
+                        .to_vec(),
+                ),
+            },
+        }
     }
 }
 

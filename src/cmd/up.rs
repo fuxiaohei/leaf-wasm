@@ -1,8 +1,10 @@
 use super::Manifest;
-use crate::server;
-use crate::vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR};
+use crate::{
+    server,
+    vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR},
+};
 use clap::Args;
-use log::{debug, error};
+use log::{debug, error, info};
 use std::net::SocketAddr;
 
 #[derive(Args, Debug)]
@@ -26,13 +28,16 @@ impl UpCommand {
         debug!("manifest: {:?}", manifest);
 
         // find wasm file
-        let wasm_file = format!("{}/{}_component.wasm", RUST_TARGET_WASM_RELEASE_DIR, manifest.name);
+        let wasm_file = format!(
+            "{}/{}_component.wasm",
+            RUST_TARGET_WASM_RELEASE_DIR, manifest.name
+        );
         if !std::path::PathBuf::from(&wasm_file).exists() {
             // TODO: try compile wasm file
             error!("wasm file not found: {}", &wasm_file);
             return;
         }
-        debug!("wasm file: {}", &wasm_file);
+        info!("wasm file: {}", &wasm_file);
 
         // start local server
         server::start(self.addr.unwrap(), wasm_file).await;

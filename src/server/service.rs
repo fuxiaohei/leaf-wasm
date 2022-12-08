@@ -1,16 +1,15 @@
 use crate::errors::Error;
 use crate::wasm::{Manager, Pool, Request as LeafRequest, Response as LeafResponse};
 use futures::future::{self, Ready};
-use hyper::body::Body;
-use hyper::server::conn::AddrStream;
-use hyper::service::Service;
-use hyper::Request;
-use hyper::Response;
+use hyper::{body::Body, server::conn::AddrStream, service::Service, Request, Response};
+use log::warn;
 use once_cell::sync::OnceCell;
-use std::convert::Infallible;
-use std::future::Future;
-use std::pin::Pin;
-use std::task::{Context, Poll};
+use std::{
+    convert::Infallible,
+    future::Future,
+    pin::Pin,
+    task::{Context, Poll},
+};
 
 static POOL: OnceCell<Pool> = OnceCell::new();
 
@@ -25,26 +24,42 @@ impl<'a> Service<Request<Body>> for ServiceContext {
         Poll::Ready(Ok(()))
     }
 
-    fn call(&mut self, _req: Request<Body>) -> Self::Future {
+    fn call(&mut self, mut req: Request<Body>) -> Self::Future {
         let fut = async move {
             let pool = POOL.get().unwrap();
             let mut worker = pool.get().await.unwrap();
             let worker = worker.as_mut();
 
-            let headers: Vec<(&str, &str)> = vec![];
+            let mut headers: Vec<(&str, &str)> = vec![];
+            let req_headers = req.headers().clone();
+            req_headers.iter().for_each(|(k, v)| {
+                headers.push((k.as_str(), v.to_str().unwrap()));
+            });
+
+            let url = req.uri().to_string();
+            let method = req.method().clone();
+            let body_bytes = hyper::body::to_bytes(req.body_mut()).await?.to_vec();
+
             let req = LeafRequest {
-                method: "GET",
-                uri: "/abc",
+                method: method.as_str(),
+                uri: url.as_str(),
                 headers: &headers,
-                body: Some("xxxyyy".as_bytes()),
+                body: Some(&body_bytes),
             };
 
-            let resp: LeafResponse = worker
-                .exports
-                .handle_request(&mut worker.store, req)
-                .unwrap();
+            let resp: LeafResponse = match worker.exports.handle_request(&mut worker.store, req) {
+                Ok(r) => r,
+                Err(e) => {
+                    warn!("---error {:?}", e);
+                    return Ok(Response::new(Body::from("Error")));
+                }
+            };
 
-            let resp = Response::new(Body::from(resp.body.unwrap()));
+            let mut builder = Response::builder().status(resp.status);
+            for (k, v) in resp.headers {
+                builder = builder.header(k, v);
+            }
+            let resp = builder.body(Body::from(resp.body.unwrap())).unwrap();
 
             // let resp = Response::new(Body::from("Hello"));
 
