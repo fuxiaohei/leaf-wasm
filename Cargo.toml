@@ -22,8 +22,7 @@ tokio = { version = "1.22.0", features = ["full"] }
 toml = "0.5.9"
 tracing = { version = "0.1.37", features = ["max_level_debug", "release_max_level_info"] }
 tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
-wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model"] }
-wit-bindgen-host-wasmtime-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model","async"] }
 
 [build-dependencies]
 vergen = "7.4.2"

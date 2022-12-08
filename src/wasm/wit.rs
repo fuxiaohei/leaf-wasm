@@ -1,4 +1,4 @@
-wit_bindgen_host_wasmtime_rust::generate!("./wit/leaf-http.wit");
+wasmtime::component::bindgen!("./wit/leaf-http.wit");
 
 #[test]
 fn run_wasm_worker_test() {
