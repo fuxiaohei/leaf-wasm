@@ -32,4 +32,4 @@ jobs:
 
       - name: Test ABI impl
         run: |
-          cargo test --release
+          cargo test --release --workspace

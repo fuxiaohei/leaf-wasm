@@ -7,5 +7,8 @@ edition = { workspace = true }
 [dependencies]
 anyhow = "1.0.66"
 thiserror = "1.0.37"
-wit-component = "0.3.2"
 wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model"] }
+wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+wit-component = "0.3.2"
+wit-parser = "0.3.1"

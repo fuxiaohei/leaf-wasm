@@ -80,3 +80,6 @@ fn create_wasmtime_config() -> Config {
     config.wasm_component_model(true);
     config
 }
+
+mod codegen;
+pub use codegen::code_gen;

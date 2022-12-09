@@ -63,9 +63,7 @@ async fn main() {
     let args = LeafCli::parse();
     match args {
         LeafCli::New(cmd) => cmd.run().await,
-        LeafCli::Compile(cmd) => {
-            println!("Compile command: {:?}", cmd);
-        }
+        LeafCli::Compile(cmd) => cmd.run().await,
         LeafCli::Up(cmd) => cmd.run().await,
     }
 }
