@@ -19,7 +19,7 @@ impl managed::Manager for Manager {
     type Error = crate::errors::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
-        Ok(Worker::new(&self.path)?)
+        Ok(Worker::new(&self.path).await?)
     }
 
     async fn recycle(&self, _obj: &mut Self::Type) -> managed::RecycleResult<Self::Error> {

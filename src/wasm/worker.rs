@@ -19,7 +19,7 @@ impl std::fmt::Debug for Worker {
 }
 
 impl Worker {
-    pub fn new(path: &str) -> Result<Self, Error> {
+    pub async fn new(path: &str) -> Result<Self, Error> {
         let config = create_wasmtime_config();
         let engine = Engine::new(&config).map_err(Error::InitEngine)?;
         let component = Component::from_file(&engine, path)
@@ -27,8 +27,10 @@ impl Worker {
 
         let mut store = Store::new(&engine, ());
         let linker: Linker<()> = Linker::new(&engine);
-        let (exports, instance) = super::LeafHttp::instantiate(&mut store, &component, &linker)
-            .map_err(Error::InstantiateWasmComponent)?;
+        let (exports, instance) =
+            super::LeafHttp::instantiate_async(&mut store, &component, &linker)
+                .await
+                .map_err(Error::InstantiateWasmComponent)?;
 
         Ok(Self {
             engine,
@@ -43,5 +45,6 @@ impl Worker {
 fn create_wasmtime_config() -> Config {
     let mut config = Config::new();
     config.wasm_component_model(true);
+    config.async_support(true);
     config
 }

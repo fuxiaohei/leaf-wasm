@@ -1,12 +1,15 @@
-wasmtime::component::bindgen!("./wit/leaf-http.wit");
+wasmtime::component::bindgen!({
+    path: "./wit/leaf-http.wit",
+    async: true,
+});
 
-#[test]
-fn run_wasm_worker_test() {
+#[tokio::test]
+async fn run_wasm_worker_test() {
     use super::Worker;
 
     let sample_wasm_file = "./tests/data/sample.wasm";
 
-    let mut worker = Worker::new(sample_wasm_file).unwrap();
+    let mut worker = Worker::new(sample_wasm_file).await.unwrap();
 
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
@@ -20,6 +23,7 @@ fn run_wasm_worker_test() {
         let resp = worker
             .exports
             .handle_request(&mut worker.store, req)
+            .await
             .unwrap();
         assert_eq!(resp.status, 200);
         assert_eq!(resp.body, Some("xxxyyy".as_bytes().to_vec()));
@@ -67,6 +71,7 @@ async fn run_worker_pool_test() {
         let resp = worker
             .exports
             .handle_request(&mut worker.store, req)
+            .await
             .unwrap();
         assert_eq!(resp.status, 200);
         assert_eq!(resp.body, Some("xxxyyy".as_bytes().to_vec()));

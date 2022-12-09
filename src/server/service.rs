@@ -47,13 +47,14 @@ impl<'a> Service<Request<Body>> for ServiceContext {
                 body: Some(&body_bytes),
             };
 
-            let resp: LeafResponse = match worker.exports.handle_request(&mut worker.store, req) {
-                Ok(r) => r,
-                Err(e) => {
-                    warn!("---error {:?}", e);
-                    return Ok(Response::new(Body::from("Error")));
-                }
-            };
+            let resp: LeafResponse =
+                match worker.exports.handle_request(&mut worker.store, req).await {
+                    Ok(r) => r,
+                    Err(e) => {
+                        warn!("---error {:?}", e);
+                        return Ok(Response::new(Body::from("Error")));
+                    }
+                };
 
             let mut builder = Response::builder().status(resp.status);
             for (k, v) in resp.headers {

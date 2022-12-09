@@ -45,6 +45,6 @@ members =[
 ]
 
 [workspace.package]
-version = "0.1.0"
+version = "0.1.1"
 authors = ["fuxiaohei<fudong0797@gmail.com>"]
 edition = "2021"
