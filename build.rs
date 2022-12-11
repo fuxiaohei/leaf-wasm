@@ -3,6 +3,7 @@ use std::path::Path;
 
 fn main() {
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=wit/*.wit");
 
     let mut config = vergen::Config::default();
     *config.git_mut().sha_kind_mut() = vergen::ShaKind::Short;
