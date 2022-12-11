@@ -25,6 +25,7 @@ tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
 wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model","async"] }
 
 [build-dependencies]
+component-compiler = { path = "./crates/component-compiler" }
 vergen = "7.4.2"
 
 [dev-dependencies]

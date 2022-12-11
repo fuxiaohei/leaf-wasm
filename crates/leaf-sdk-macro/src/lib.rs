@@ -6,12 +6,8 @@ pub fn http_main(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let func = syn::parse_macro_input!(item as syn::ItemFn);
     let func_name = func.sig.ident.clone();
 
-    const WIT_FILE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../../wit/leaf-http.wit");
-    let wit_iface = component_compiler::code_gen(WIT_FILE);
-    let iface: TokenStream = wit_iface
-        .expect("cannot parse UTF-8 from Spin HTTP interface file")
-        .parse()
-        .expect("cannot parse Spin HTTP interface file");
+    let wit_guest_rs = include_str!("../../../wit/leaf-http.rs").to_string();
+    let iface: TokenStream = wit_guest_rs.parse().expect("cannot parse leaf-http.rs");
     let iface_impl = quote!(
 
     struct HttpImpl;

@@ -83,3 +83,4 @@ fn create_wasmtime_config() -> Config {
 
 mod codegen;
 pub use codegen::code_gen;
+pub use codegen::guest_rust_code_gen;
