@@ -4,7 +4,7 @@ use crate::{
     vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR},
 };
 use clap::Args;
-use log::{debug, error, info};
+use log::{error, info};
 use std::net::SocketAddr;
 
 #[derive(Args, Debug)]
@@ -25,19 +25,20 @@ impl UpCommand {
                 return;
             }
         };
-        debug!("manifest: {:?}", manifest);
+        info!("Read manifest '{:?}'", manifest_file);
 
         // find wasm file
         let wasm_file = format!(
-            "{}/{}_component.wasm",
-            RUST_TARGET_WASM_RELEASE_DIR, manifest.name
+            "{}/{}.wasm",
+            RUST_TARGET_WASM_RELEASE_DIR,
+            manifest.name.replace("-", "_")
         );
         if !std::path::PathBuf::from(&wasm_file).exists() {
-            // TODO: try compile wasm file
-            error!("wasm file not found: {}", &wasm_file);
+            error!("Wasm file not found: {}", &wasm_file);
+            info!("Try to run 'leaf-cli compile' to compile wasm file");
             return;
         }
-        info!("wasm file: {}", &wasm_file);
+        info!("Find wasm file: {}", &wasm_file);
 
         // start local server
         server::start(self.addr.unwrap(), wasm_file).await;
