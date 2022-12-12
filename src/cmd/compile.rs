@@ -43,6 +43,7 @@ fn do_rust_compile(manifest: &Manifest) {
         info!("Cargo build wasm success");
     } else {
         error!("Cargo build wasm failed");
+        return;
     }
 
     // check target wasm file

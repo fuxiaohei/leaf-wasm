@@ -1,5 +1,5 @@
 use crate::errors::Error;
-use crate::wit::LeafHttp;
+use crate::wit::{fetch, LeafHttp};
 use wasmtime::{
     component::{Component, Instance, Linker},
     Config, Engine, Store,
@@ -9,7 +9,7 @@ pub struct Worker {
     pub engine: Engine,
     pub component: Component,
     pub instance: Instance,
-    pub store: Store<()>,
+    pub store: Store<fetch::FetchImpl>,
     pub exports: LeafHttp,
 }
 
@@ -26,12 +26,18 @@ impl Worker {
         let component = Component::from_file(&engine, path)
             .map_err(|e| Error::ReadWasmComponent(e, String::from(path)))?;
 
-        let mut store = Store::new(&engine, ());
-        let linker: Linker<()> = Linker::new(&engine);
-        let (exports, instance) =
-            LeafHttp::instantiate_async(&mut store, &component, &linker)
-                .await
-                .map_err(Error::InstantiateWasmComponent)?;
+        // add the fetch implementation to the store
+        let fetch_impl = fetch::FetchImpl {};
+        let mut store = Store::new(&engine, fetch_impl);
+
+        // add the fetch implementation to the linker
+        let mut linker: Linker<fetch::FetchImpl> = Linker::new(&engine);
+        fetch::add_to_linker(&mut linker, |f: &mut fetch::FetchImpl| f)
+            .map_err(Error::InstantiateWasmComponent)?;
+
+        let (exports, instance) = LeafHttp::instantiate_async(&mut store, &component, &linker)
+            .await
+            .map_err(Error::InstantiateWasmComponent)?;
 
         Ok(Self {
             engine,
