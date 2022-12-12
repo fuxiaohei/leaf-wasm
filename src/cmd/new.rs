@@ -28,8 +28,10 @@ impl NewCommand {
         let dpath = PathBuf::from(&self.name);
 
         // create leaf.toml
-        let mut manifest = Manifest::default();
-        manifest.name = self.name.clone();
+        let manifest = Manifest {
+            name: self.name.clone(),
+            ..Default::default()
+        };
         let manifest_file = dpath.join(DEFAULT_MANIFEST_FILE);
         if Path::new(manifest_file.to_str().unwrap()).exists() {
             error!(
@@ -46,13 +48,18 @@ impl NewCommand {
     }
 }
 
-fn create_project(name: &str, _template: &str) {
-    let cargotoml_content = include_str!("../../etc/sample/Cargo.toml.tpl");
+fn create_project(name: &str, template: &str) {
+    let cargotoml_content = include_str!("../../etc/sample-rust/Cargo.toml.tpl");
     let cargotoml_content = cargotoml_content.replace("{{name}}", name);
     let cargotoml = Path::new(name).join("Cargo.toml");
     std::fs::write(cargotoml, cargotoml_content).unwrap();
 
-    let code_content = include_str!("../../etc/sample/lib.rs");
+    let mut code_content = "";
+    if template == "hello-rust" {
+        code_content = include_str!("../../etc/sample-rust/http-hello.rs");
+    } else if template == "fetch-rust" {
+        code_content = include_str!("../../etc/sample-rust/http-fetch-hello.rs");
+    }
     let codefile = Path::new(name).join("src/lib.rs");
     std::fs::create_dir_all(codefile.parent().unwrap()).unwrap();
     std::fs::write(codefile, code_content).unwrap();

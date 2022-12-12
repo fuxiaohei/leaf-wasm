@@ -26,7 +26,6 @@ impl CompileCommand {
         info!("Read manifest '{:?}'", manifest_file);
         if manifest.language == PROJECT_LANGUAGE_RUST {
             do_rust_compile(&manifest);
-            return;
         }
     }
 }
@@ -50,7 +49,7 @@ fn do_rust_compile(manifest: &Manifest) {
     let target_wasm_file = format!(
         "{}/{}.wasm",
         RUST_TARGET_WASM_RELEASE_DIR,
-        manifest.name.replace("-", "_")
+        manifest.name.replace('-', "_")
     );
     if !PathBuf::from(&target_wasm_file).exists() {
         error!("Wasm file not found: {}", &target_wasm_file);

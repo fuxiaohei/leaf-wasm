@@ -11,7 +11,7 @@ fn parse_world(s: &str) -> Result<World> {
         panic!("wit file `{}` does not exist", path.display());
     }
 
-    let world = World::parse_file(&path)
+    let world = World::parse_file(path)
         .with_context(|| format!("failed to parse wit file `{}`", path.display()))
         .map_err(|e| {
             eprintln!("{e:?}");

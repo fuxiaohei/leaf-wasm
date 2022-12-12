@@ -31,7 +31,7 @@ impl UpCommand {
         let wasm_file = format!(
             "{}/{}.wasm",
             RUST_TARGET_WASM_RELEASE_DIR,
-            manifest.name.replace("-", "_")
+            manifest.name.replace('-', "_")
         );
         if !std::path::PathBuf::from(&wasm_file).exists() {
             error!("Wasm file not found: {}", &wasm_file);

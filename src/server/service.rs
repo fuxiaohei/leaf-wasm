@@ -18,7 +18,7 @@ static POOL: OnceCell<Pool> = OnceCell::new();
 
 pub struct ServiceContext {}
 
-impl<'a> Service<Request<Body>> for ServiceContext {
+impl Service<Request<Body>> for ServiceContext {
     type Response = Response<Body>;
     type Error = hyper::Error;
     type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>> + Send>>;

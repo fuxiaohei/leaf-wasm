@@ -34,6 +34,8 @@ interface http-imports {
         destination-not-allowed,
         // The request failed due to over requests limit.
         too-many-requests,
+        // The request failed due to invalid request 
+        invalid-request,
     }
     // request remote function
     fetch: func(req: request) -> result<response,http-error>
