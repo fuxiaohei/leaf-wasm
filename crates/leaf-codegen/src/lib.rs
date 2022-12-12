@@ -49,23 +49,3 @@ pub fn guest_rust_code_gen(fpath: &str) -> Result<(String, String)> {
     }
     Err(anyhow::anyhow!("{} not found in generator", rs_path))
 }
-
-pub fn code_gen(s: &str) -> Result<String> {
-    let world = parse_world(s).unwrap();
-    let opts = Opts::default();
-    let mut builder = opts.build();
-    let mut files = wit_bindgen_core::Files::default();
-    builder.generate(&world, &mut files);
-    for (name, contents) in files.iter() {
-        if name == "leaf-http.rs" {
-            return Ok(String::from_utf8_lossy(contents).to_string());
-        }
-    }
-    Err(anyhow::anyhow!("leaf-http.rs not found"))
-}
-
-#[test]
-fn run_codegen_test() {
-    let res = code_gen("../../wit/leaf-http.wit");
-    assert!(res.is_ok())
-}

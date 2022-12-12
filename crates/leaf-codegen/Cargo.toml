@@ -1,5 +1,5 @@
 [package]
-name = "component-compiler"
+name = "leaf-codegen"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }

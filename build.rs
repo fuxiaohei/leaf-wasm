@@ -1,4 +1,4 @@
-use component_compiler::guest_rust_code_gen;
+use leaf_codegen::guest_rust_code_gen;
 use std::path::Path;
 
 fn main() {

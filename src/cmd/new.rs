@@ -47,12 +47,12 @@ impl NewCommand {
 }
 
 fn create_project(name: &str, _template: &str) {
-    let cargotoml_content = include_str!("../../sample/Cargo.toml.tpl");
+    let cargotoml_content = include_str!("../../etc/sample/Cargo.toml.tpl");
     let cargotoml_content = cargotoml_content.replace("{{name}}", name);
     let cargotoml = Path::new(name).join("Cargo.toml");
     std::fs::write(cargotoml, cargotoml_content).unwrap();
 
-    let code_content = include_str!("../../sample/src/lib.rs");
+    let code_content = include_str!("../../etc/sample/lib.rs");
     let codefile = Path::new(name).join("src/lib.rs");
     std::fs::create_dir_all(codefile.parent().unwrap()).unwrap();
     std::fs::write(codefile, code_content).unwrap();

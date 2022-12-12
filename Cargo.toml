@@ -26,11 +26,8 @@ wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["
 wit-component = "0.3.2"
 
 [build-dependencies]
-component-compiler = { path = "./crates/component-compiler" }
+leaf-codegen = { path = "./crates/leaf-codegen" }
 vergen = "7.4.2"
-
-[dev-dependencies]
-component-compiler = { path = "./crates/component-compiler" }
 
 [[bin]]
 name = "leaf-cli"
@@ -38,15 +35,12 @@ path = "src/main.rs"
 
 [workspace]
 members =[
-    "crates/component-compiler",
-    "crates/leaf-abi-impl",
+    "crates/leaf-codegen",
     "crates/leaf-sdk",
-    "crates/leaf-sdk-impl",
     "crates/leaf-sdk-macro",
-    "sample"
 ]
 
 [workspace.package]
-version = "0.1.3"
+version = "0.1.5"
 authors = ["fuxiaohei<fudong0797@gmail.com>"]
 edition = "2021"

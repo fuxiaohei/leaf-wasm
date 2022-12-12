@@ -22,8 +22,21 @@ interface http-imports {
         headers: headers,
         body: option<body>,
     }
+    // HTTP errors returned by the runtime.
+    enum http-error {
+        // The request failed due to a network error.
+        network-error,
+        // The request failed due to a timeout.
+        timeout,
+        // The request failed due to a invalid url.
+        invalid-url,
+        // The request failed due to a forbidden destination.
+        destination-not-allowed,
+        // The request failed due to over requests limit.
+        too-many-requests,
+    }
     // request remote function
-    fetch: func(req: request) -> response
+    fetch: func(req: request) -> result<response,http-error>
 }
 
 

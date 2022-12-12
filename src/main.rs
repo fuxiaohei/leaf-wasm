@@ -5,6 +5,7 @@ mod errors;
 mod server;
 mod vars;
 mod wasm;
+mod wit;
 
 fn build_info() -> String {
     format!(

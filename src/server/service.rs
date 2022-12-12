@@ -1,7 +1,10 @@
 use crate::errors::Error;
-use crate::wasm::{Manager, Pool, Request as LeafRequest, Response as LeafResponse};
+use crate::wasm::{Manager, Pool};
+use crate::wit::{Request as LeafRequest, Response as LeafResponse};
 use futures::future::{self, Ready};
-use hyper::{body::Body, server::conn::AddrStream, service::Service, Request, Response};
+use hyper::{
+    body::Body, http::StatusCode, server::conn::AddrStream, service::Service, Request, Response,
+};
 use log::warn;
 use once_cell::sync::OnceCell;
 use std::{
@@ -27,7 +30,15 @@ impl<'a> Service<Request<Body>> for ServiceContext {
     fn call(&mut self, mut req: Request<Body>) -> Self::Future {
         let fut = async move {
             let pool = POOL.get().unwrap();
-            let mut worker = pool.get().await.unwrap();
+            let mut worker = match pool.get().await {
+                Ok(pool) => pool,
+                Err(e) => {
+                    return Ok(create_error_response(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        e.to_string(),
+                    ));
+                }
+            };
             let worker = worker.as_mut();
 
             let mut headers: Vec<(&str, &str)> = vec![];
@@ -68,6 +79,13 @@ impl<'a> Service<Request<Body>> for ServiceContext {
         };
         Box::pin(fut)
     }
+}
+
+fn create_error_response(status: StatusCode, message: String) -> Response<Body> {
+    Response::builder()
+        .status(status)
+        .body(Body::from(message))
+        .unwrap()
 }
 
 pub struct ServerContext {}
