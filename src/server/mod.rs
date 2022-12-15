@@ -8,7 +8,7 @@ pub async fn start(addr: SocketAddr, wasm: String) {
     let svc = match service::ServerContext::new(wasm) {
         Ok(svc) => svc,
         Err(e) => {
-            error!("init server context error: {}", e);
+            error!("[Server] init error: {}", e);
             return;
         }
     };
@@ -16,15 +16,15 @@ pub async fn start(addr: SocketAddr, wasm: String) {
     let server = match Server::try_bind(&addr) {
         Ok(server) => server.serve(svc),
         Err(e) => {
-            error!("Starting server error, failed to bind: {}", e);
+            error!("[Server] starting failed to bind: {}", e);
             return;
         }
     };
 
-    info!("Starting server on {}", addr);
+    info!("[Server] starting on {}", addr);
 
     // Run this server for... forever!
     if let Err(e) = server.await {
-        error!("Starting server error: {}", e);
+        error!("[Server] starting error: {}", e);
     }
 }

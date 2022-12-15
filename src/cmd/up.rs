@@ -25,7 +25,7 @@ impl UpCommand {
                 return;
             }
         };
-        info!("Read manifest '{:?}'", manifest_file);
+        info!("[Main] read manifest '{:?}'", manifest_file);
 
         // find wasm file
         let wasm_file = format!(
@@ -33,12 +33,13 @@ impl UpCommand {
             RUST_TARGET_WASM_RELEASE_DIR,
             manifest.name.replace('-', "_")
         );
+
         if !std::path::PathBuf::from(&wasm_file).exists() {
-            error!("Wasm file not found: {}", &wasm_file);
-            info!("Try to run 'leaf-cli compile' to compile wasm file");
+            error!("[Worker] file not found: {}", &wasm_file);
+            info!("[Worker] Try to run 'leaf-cli compile' to compile wasm file");
             return;
         }
-        info!("Find wasm file: {}", &wasm_file);
+        info!("[Worker] use file: {}", &wasm_file);
 
         // start local server
         server::start(self.addr.unwrap(), wasm_file).await;

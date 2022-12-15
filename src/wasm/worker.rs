@@ -1,5 +1,7 @@
 use crate::errors::Error;
 use crate::wit::{fetch, LeafHttp};
+use log::info;
+use tokio::time::Instant;
 use wasmtime::{
     component::{Component, Instance, Linker},
     Config, Engine, Store,
@@ -21,13 +23,14 @@ impl std::fmt::Debug for Worker {
 
 impl Worker {
     pub async fn new(path: &str) -> Result<Self, Error> {
+        let start_time = Instant::now();
         let config = create_wasmtime_config();
         let engine = Engine::new(&config).map_err(Error::InitEngine)?;
         let component = Component::from_file(&engine, path)
             .map_err(|e| Error::ReadWasmComponent(e, String::from(path)))?;
 
         // add the fetch implementation to the store
-        let fetch_impl = fetch::FetchImpl {};
+        let fetch_impl = fetch::FetchImpl { req_id: 0 };
         let mut store = Store::new(&engine, fetch_impl);
 
         // add the fetch implementation to the linker
@@ -38,6 +41,12 @@ impl Worker {
         let (exports, instance) = LeafHttp::instantiate_async(&mut store, &component, &linker)
             .await
             .map_err(Error::InstantiateWasmComponent)?;
+
+        info!(
+            "[Worker] new instance, path: {}, took: {:?} ms",
+            path,
+            start_time.elapsed().as_millis()
+        );
 
         Ok(Self {
             engine,

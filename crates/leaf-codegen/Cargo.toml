@@ -5,10 +5,10 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-anyhow = "1.0.66"
-thiserror = "1.0.37"
-wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["component-model"] }
-wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
-wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
-wit-component = "0.3.2"
-wit-parser = "0.3.1"
+anyhow = { workspace = true}
+thiserror = {workspace =true}
+wasmtime = { workspace =true }
+wit-bindgen-core = { workspace =true }
+wit-bindgen-gen-guest-rust ={ workspace =true }
+wit-component = { workspace =true }
+wit-parser = { workspace =true }
