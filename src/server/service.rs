@@ -55,6 +55,23 @@ impl Service<Request<Body>> for ServiceContext {
                 }
             };
             let worker = worker.as_mut();
+
+            if worker.is_trapped {
+                if worker.renew().await.is_err() {
+                    warn!(
+                        "[Request] id={} {} {}, failed: {}",
+                        req_id,
+                        req.method(),
+                        req.uri(),
+                        "renew worker failed"
+                    );
+                    return Ok(create_error_response(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        "renew worker failed".to_string(),
+                    ));
+                }
+            }
+            
             worker.store.data_mut().req_id = req_id;
 
             // convert hyper Request to wasm request
@@ -82,6 +99,7 @@ impl Service<Request<Body>> for ServiceContext {
             {
                 Ok(r) => r,
                 Err(e) => {
+                    worker.is_trapped = true;
                     warn!(
                         "[Request] id={} {} {}, failed: {}",
                         req_id,

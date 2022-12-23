@@ -15,6 +15,15 @@ pub struct NewCommand {
 }
 
 impl NewCommand {
+    fn determine_language(&self) -> String {
+        if self.template.is_some() {
+            let template = self.template.as_ref().unwrap();
+            if template.contains("rust") {
+                return String::from("rust");
+            }
+        }
+        String::from("rust")
+    }
     pub async fn run(&self) {
         // check manifest file exist
         debug!("New command: run {:?}", self);
@@ -30,6 +39,7 @@ impl NewCommand {
         // create leaf.toml
         let manifest = Manifest {
             name: self.name.clone(),
+            language: self.determine_language(),
             ..Default::default()
         };
         let manifest_file = dpath.join(DEFAULT_MANIFEST_FILE);
