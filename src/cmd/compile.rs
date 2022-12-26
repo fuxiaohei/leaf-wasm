@@ -3,6 +3,7 @@ use crate::vars::{DEFAULT_MANIFEST_FILE, PROJECT_LANGUAGE_RUST, RUST_TARGET_WASM
 use clap::Args;
 use log::{error, info};
 use std::path::PathBuf;
+use std::process::{Command, Stdio};
 use wit_component::ComponentEncoder;
 
 #[derive(Args, Debug)]
@@ -32,17 +33,20 @@ impl CompileCommand {
 
 fn do_rust_compile(manifest: &Manifest) {
     // run cargo build --release wasm32-unknow-unknown
-    let output = std::process::Command::new("cargo")
+    let child = Command::new("cargo")
         .arg("build")
         .arg("--release")
         .arg("--target=wasm32-unknown-unknown")
-        .output()
-        .expect("failed to execute process");
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("failed to execute cargo child process");
+    let output = child
+        .wait_with_output()
+        .expect("failed to wait on cargo child process");
     if output.status.success() {
         info!("Cargo build wasm success");
     } else {
-        error!("Cargo build wasm failed");
-        return;
+        panic!("Cargo build wasm failed: {:?}", output);
     }
 
     // check target wasm file
@@ -52,8 +56,7 @@ fn do_rust_compile(manifest: &Manifest) {
         manifest.name.replace('-', "_")
     );
     if !PathBuf::from(&target_wasm_file).exists() {
-        error!("Wasm file not found: {}", &target_wasm_file);
-        return;
+        panic!("Wasm file not found: {}", &target_wasm_file);
     }
     convert_rust_component(&target_wasm_file);
 }
