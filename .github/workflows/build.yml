@@ -33,3 +33,9 @@ jobs:
       - name: Test ABI impl
         run: |
           cargo test --release
+
+      - name: Test Cli
+        run: |
+          ./target/release/leaf-cli new hello-rust
+          cd hello-rust
+          ../target/release/leaf-cli compile
