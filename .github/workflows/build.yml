@@ -50,6 +50,7 @@ jobs:
           name: leaf-cli
       - name: Build project
         run: |
+          chmod +x ./leaf-cli
           ./leaf-cli --version
           ./leaf-cli new hello-rust
           cd hello-rust
