@@ -11,6 +11,8 @@ clap = { version = "4.0.26", features = ["derive"] }
 deadpool = { version = "0.9.5", features = ["rt_tokio_1"] }
 futures = "0.3.25"
 hyper = { version = "0.14.23", features = ["full"] }
+hyper-rustls = { version = "0.23.2", features = ["http2"] }
+hyper-timeout = "0.4.1"
 lazy_static = "1.4.0"
 log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
 once_cell = "1.16.0"
@@ -41,7 +43,7 @@ members =[
 ]
 
 [workspace.package]
-version = "0.1.8"
+version = "0.1.9"
 authors = ["fuxiaohei<fudong0797@gmail.com>"]
 edition = "2021"
 

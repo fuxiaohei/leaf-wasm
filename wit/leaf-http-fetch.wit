@@ -37,8 +37,15 @@ interface http-imports {
         // The request failed due to invalid request 
         invalid-request,
     }
+    // HTTP fetch request option
+    record fetch-options{
+        // The request timeout in milliseconds.
+        timeout: u32,
+        // Decompress the response body.
+        decompress: bool,
+    }
     // request remote function
-    fetch: func(req: request) -> result<response,http-error>
+    fetch: func(req: request, options: fetch-options) -> result<response,http-error>
 }
 
 

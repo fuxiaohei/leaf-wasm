@@ -5,7 +5,21 @@ use super::http::{Error, Request, Response};
 
 include!("../../../wit/leaf-http-fetch.rs");
 
-pub fn fetch(req: Request) -> Result<Response, Error> {
+pub struct FetchOptions {
+    pub timeout: u32,
+    pub decompress: bool,
+}
+
+impl Default for FetchOptions {
+    fn default() -> Self {
+        FetchOptions {
+            timeout: 30,
+            decompress: false,
+        }
+    }
+}
+
+pub fn fetch(req: Request, options: FetchOptions) -> Result<Response, Error> {
     // convert leaf_http::Request to http_fetch::Request
     let mut headers = vec![];
     for (key, value) in req.headers() {
@@ -23,8 +37,14 @@ pub fn fetch(req: Request) -> Result<Response, Error> {
         body: Some(body.as_slice()),
     };
 
+    // set options
+    let opts = http_fetch::FetchOptions {
+        timeout: options.timeout,
+        decompress: options.decompress,
+    };
+
     // call host function to fetch
-    let fetch_resp = http_fetch::fetch(fetch_req)?;
+    let fetch_resp = http_fetch::fetch(fetch_req, opts)?;
 
     // convert http_fetch::Response to leaf_http::Response
     let body = match fetch_resp.body {

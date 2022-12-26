@@ -90,7 +90,21 @@ pub mod http_fetch {
     }
 
     impl std::error::Error for HttpError {}
-    pub fn fetch(req: Request<'_>) -> Result<Response, HttpError> {
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    pub struct FetchOptions {
+        pub timeout: u32,
+        pub decompress: bool,
+    }
+    impl core::fmt::Debug for FetchOptions {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            f.debug_struct("FetchOptions")
+                .field("timeout", &self.timeout)
+                .field("decompress", &self.decompress)
+                .finish()
+        }
+    }
+    pub fn fetch(req: Request<'_>, options: FetchOptions) -> Result<Response, HttpError> {
         unsafe {
             let Request {
                 method: method0,
@@ -142,16 +156,23 @@ pub mod http_fetch {
                 }
                 None => (0i32, 0i32, 0i32),
             };
+            let FetchOptions {
+                timeout: timeout9,
+                decompress: decompress9,
+            } = options;
+
             #[repr(align(4))]
             struct RetArea([u8; 28]);
             let mut ret_area = core::mem::MaybeUninit::<RetArea>::uninit();
-            let ptr9 = ret_area.as_mut_ptr() as i32;
+            let ptr10 = ret_area.as_mut_ptr() as i32;
 
             #[link(wasm_import_module = "http-fetch")]
             extern "C" {
                 #[cfg_attr(target_arch = "wasm32", link_name = "fetch")]
                 #[cfg_attr(not(target_arch = "wasm32"), link_name = "http-fetch_fetch")]
                 fn wit_import(
+                    _: i32,
+                    _: i32,
                     _: i32,
                     _: i32,
                     _: i32,
@@ -174,59 +195,64 @@ pub mod http_fetch {
                 result8_0,
                 result8_1,
                 result8_2,
-                ptr9,
+                wit_bindgen_guest_rust::rt::as_i32(timeout9),
+                match decompress9 {
+                    true => 1,
+                    false => 0,
+                },
+                ptr10,
             );
             if layout6.size() != 0 {
                 alloc::dealloc(result6, layout6);
             }
-            match i32::from(*((ptr9 + 0) as *const u8)) {
+            match i32::from(*((ptr10 + 0) as *const u8)) {
                 0 => Ok({
-                    let base12 = *((ptr9 + 8) as *const i32);
-                    let len12 = *((ptr9 + 12) as *const i32);
-                    let mut result12 = Vec::with_capacity(len12 as usize);
-                    for i in 0..len12 {
-                        let base = base12 + i * 16;
-                        result12.push({
-                            let len10 = *((base + 4) as *const i32) as usize;
-                            let len11 = *((base + 12) as *const i32) as usize;
+                    let base13 = *((ptr10 + 8) as *const i32);
+                    let len13 = *((ptr10 + 12) as *const i32);
+                    let mut result13 = Vec::with_capacity(len13 as usize);
+                    for i in 0..len13 {
+                        let base = base13 + i * 16;
+                        result13.push({
+                            let len11 = *((base + 4) as *const i32) as usize;
+                            let len12 = *((base + 12) as *const i32) as usize;
 
                             (
                                 String::from_utf8(Vec::from_raw_parts(
                                     *((base + 0) as *const i32) as *mut _,
-                                    len10,
-                                    len10,
+                                    len11,
+                                    len11,
                                 ))
                                 .unwrap(),
                                 String::from_utf8(Vec::from_raw_parts(
                                     *((base + 8) as *const i32) as *mut _,
-                                    len11,
-                                    len11,
+                                    len12,
+                                    len12,
                                 ))
                                 .unwrap(),
                             )
                         });
                     }
-                    wit_bindgen_guest_rust::rt::dealloc(base12, (len12 as usize) * 16, 4);
+                    wit_bindgen_guest_rust::rt::dealloc(base13, (len13 as usize) * 16, 4);
 
                     Response {
-                        status: i32::from(*((ptr9 + 4) as *const u16)) as u16,
-                        headers: result12,
-                        body: match i32::from(*((ptr9 + 16) as *const u8)) {
+                        status: i32::from(*((ptr10 + 4) as *const u16)) as u16,
+                        headers: result13,
+                        body: match i32::from(*((ptr10 + 16) as *const u8)) {
                             0 => None,
                             1 => Some({
-                                let len13 = *((ptr9 + 24) as *const i32) as usize;
+                                let len14 = *((ptr10 + 24) as *const i32) as usize;
 
                                 Vec::from_raw_parts(
-                                    *((ptr9 + 20) as *const i32) as *mut _,
-                                    len13,
-                                    len13,
+                                    *((ptr10 + 20) as *const i32) as *mut _,
+                                    len14,
+                                    len14,
                                 )
                             }),
                             _ => panic!("invalid enum discriminant"),
                         },
                     }
                 }),
-                1 => Err(match i32::from(*((ptr9 + 4) as *const u8)) {
+                1 => Err(match i32::from(*((ptr10 + 4) as *const u8)) {
                     0 => HttpError::NetworkError,
                     1 => HttpError::Timeout,
                     2 => HttpError::InvalidUrl,
@@ -243,9 +269,9 @@ pub mod http_fetch {
 
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:leaf-http-fetch"]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 379] = [
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 435] = [
     1, 0, 15, 108, 101, 97, 102, 45, 104, 116, 116, 112, 45, 102, 101, 116, 99, 104, 0, 97, 115,
-    109, 10, 0, 1, 0, 7, 205, 2, 13, 123, 111, 2, 115, 115, 112, 1, 115, 112, 125, 115, 107, 4,
+    109, 10, 0, 1, 0, 7, 133, 3, 14, 123, 111, 2, 115, 115, 112, 1, 115, 112, 125, 115, 107, 4,
     114, 4, 6, 109, 101, 116, 104, 111, 100, 5, 3, 117, 114, 105, 3, 7, 104, 101, 97, 100, 101,
     114, 115, 2, 4, 98, 111, 100, 121, 6, 114, 3, 6, 115, 116, 97, 116, 117, 115, 0, 7, 104, 101,
     97, 100, 101, 114, 115, 2, 4, 98, 111, 100, 121, 6, 109, 6, 13, 110, 101, 116, 119, 111, 114,
@@ -253,14 +279,17 @@ pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 379] = [
     108, 105, 100, 45, 117, 114, 108, 23, 100, 101, 115, 116, 105, 110, 97, 116, 105, 111, 110, 45,
     110, 111, 116, 45, 97, 108, 108, 111, 119, 101, 100, 17, 116, 111, 111, 45, 109, 97, 110, 121,
     45, 114, 101, 113, 117, 101, 115, 116, 115, 15, 105, 110, 118, 97, 108, 105, 100, 45, 114, 101,
-    113, 117, 101, 115, 116, 106, 1, 8, 1, 9, 64, 1, 3, 114, 101, 113, 7, 0, 10, 66, 18, 2, 3, 2,
-    1, 0, 4, 6, 115, 116, 97, 116, 117, 115, 0, 3, 0, 0, 2, 3, 2, 1, 2, 4, 7, 104, 101, 97, 100,
-    101, 114, 115, 0, 3, 0, 1, 2, 3, 2, 1, 3, 4, 3, 117, 114, 105, 0, 3, 0, 2, 2, 3, 2, 1, 4, 4, 4,
-    98, 111, 100, 121, 0, 3, 0, 3, 2, 3, 2, 1, 5, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3, 0, 4,
-    2, 3, 2, 1, 7, 4, 7, 114, 101, 113, 117, 101, 115, 116, 0, 3, 0, 5, 2, 3, 2, 1, 8, 4, 8, 114,
-    101, 115, 112, 111, 110, 115, 101, 0, 3, 0, 6, 2, 3, 2, 1, 9, 4, 10, 104, 116, 116, 112, 45,
-    101, 114, 114, 111, 114, 0, 3, 0, 7, 2, 3, 2, 1, 11, 4, 5, 102, 101, 116, 99, 104, 0, 1, 8, 10,
-    15, 1, 10, 104, 116, 116, 112, 45, 102, 101, 116, 99, 104, 0, 5, 12,
+    113, 117, 101, 115, 116, 114, 2, 7, 116, 105, 109, 101, 111, 117, 116, 121, 10, 100, 101, 99,
+    111, 109, 112, 114, 101, 115, 115, 127, 106, 1, 8, 1, 9, 64, 2, 3, 114, 101, 113, 7, 7, 111,
+    112, 116, 105, 111, 110, 115, 10, 0, 11, 66, 20, 2, 3, 2, 1, 0, 4, 6, 115, 116, 97, 116, 117,
+    115, 0, 3, 0, 0, 2, 3, 2, 1, 2, 4, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 0, 1, 2, 3, 2, 1,
+    3, 4, 3, 117, 114, 105, 0, 3, 0, 2, 2, 3, 2, 1, 4, 4, 4, 98, 111, 100, 121, 0, 3, 0, 3, 2, 3,
+    2, 1, 5, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3, 0, 4, 2, 3, 2, 1, 7, 4, 7, 114, 101, 113,
+    117, 101, 115, 116, 0, 3, 0, 5, 2, 3, 2, 1, 8, 4, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0,
+    3, 0, 6, 2, 3, 2, 1, 9, 4, 10, 104, 116, 116, 112, 45, 101, 114, 114, 111, 114, 0, 3, 0, 7, 2,
+    3, 2, 1, 10, 4, 13, 102, 101, 116, 99, 104, 45, 111, 112, 116, 105, 111, 110, 115, 0, 3, 0, 8,
+    2, 3, 2, 1, 12, 4, 5, 102, 101, 116, 99, 104, 0, 1, 9, 10, 15, 1, 10, 104, 116, 116, 112, 45,
+    102, 101, 116, 99, 104, 0, 5, 13,
 ];
 
 #[inline(never)]
