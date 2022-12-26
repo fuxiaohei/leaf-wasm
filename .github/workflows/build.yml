@@ -34,8 +34,23 @@ jobs:
         run: |
           cargo test --release
 
-      - name: Test Cli
+      - name: Upload cli binary
+        uses: actions/upload-artifact@v3
+        with:
+          name: leaf-cli
+          path: target/release/leaf-cli
+
+  build_project:
+    runs-on: ubuntu-latest
+    needs: build_latest
+    steps:
+      - name: Download cli binary
+        uses: actions/download-artifact@v3
+        with:
+          name: leaf-cli
+      - name: Build project
         run: |
-          ./target/release/leaf-cli new hello-rust
+          ./leaf-cli --version
+          ./leaf-cli new hello-rust
           cd hello-rust
-          ../target/release/leaf-cli compile
+          ../leaf-cli compile
