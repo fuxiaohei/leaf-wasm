@@ -1,6 +1,7 @@
 use clap::Parser;
 use lazy_static::lazy_static;
 mod cmd;
+mod embed;
 mod errors;
 mod server;
 mod vars;

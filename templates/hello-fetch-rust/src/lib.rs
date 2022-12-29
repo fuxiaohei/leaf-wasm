@@ -14,16 +14,15 @@ pub fn handle_sdk_http(mut req: Request) -> Response {
         .unwrap();
 
     let fetch_response = fetch(
-        req,
+        fetch_request,
         FetchOptions {
             timeout: 30,
             decompress: false,
         },
     )
     .unwrap();
+
     let resp = http::Response::builder()
-        .header("X-Request-Url", url.to_string())
-        .header("X-Request-Method", method)
         .status(200)
         .body(fetch_response.body().clone())
         .unwrap();

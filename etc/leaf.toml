@@ -1,5 +1,0 @@
-manifest = "1.0"
-name = "sample"
-description = "Sample application"
-authors = ["Sample Author"]
-language = "rust"

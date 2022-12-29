@@ -34,7 +34,7 @@ async fn run_worker_pool_test() {
     use super::{Manager, Pool};
     use crate::wit::Request;
 
-    let sample_wasm_file = "./etc/sample.wasm";
+    let sample_wasm_file = "./tests/sample.wasm";
     let mgr = Manager::new(sample_wasm_file.to_string());
     let pool = Pool::builder(mgr).build().unwrap();
 

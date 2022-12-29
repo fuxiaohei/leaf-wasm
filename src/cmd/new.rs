@@ -1,3 +1,4 @@
+use crate::embed::TemplatesAsset;
 use crate::errors::Error;
 use crate::vars::DEFAULT_MANIFEST_FILE;
 use clap::Args;
@@ -54,25 +55,44 @@ impl NewCommand {
         info!("Created manifest: {}", manifest_file.to_str().unwrap());
 
         // create sample project
-        create_project(&self.name, self.template.as_ref().unwrap().as_str());
+        if create_project(&self.name, self.template.as_ref().unwrap().as_str()) {
+            info!("Created project: {}", &self.name);
+        } else {
+            error!("Create project failed");
+        }
     }
 }
 
-fn create_project(name: &str, template: &str) {
-    let cargotoml_content = include_str!("../../etc/sample-rust/Cargo.toml.tpl");
-    let cargotoml_content = cargotoml_content.replace("{{name}}", name);
+fn create_project(name: &str, template: &str) -> bool {
+    let cargotoml_path = Path::new(template).join("Cargo.toml.tpl");
+    debug!("[New] use cargo.toml path: {:?}", cargotoml_path);
+    let cargotoml_content = match TemplatesAsset::get(cargotoml_path.to_str().unwrap()) {
+        Some(c) => c,
+        None => {
+            error!("Template toml not found: {}", template);
+            return false;
+        }
+    };
+    let mut cargotoml_content = std::str::from_utf8(&cargotoml_content.data)
+        .unwrap()
+        .to_string();
+    cargotoml_content = cargotoml_content.replace("{{name}}", name);
     let cargotoml = Path::new(name).join("Cargo.toml");
     std::fs::write(cargotoml, cargotoml_content).unwrap();
 
-    let mut code_content = "";
-    if template == "hello-rust" {
-        code_content = include_str!("../../etc/sample-rust/http-hello.rs");
-    } else if template == "fetch-rust" {
-        code_content = include_str!("../../etc/sample-rust/http-fetch-hello.rs");
-    }
-    let codefile = Path::new(name).join("src/lib.rs");
-    std::fs::create_dir_all(codefile.parent().unwrap()).unwrap();
-    std::fs::write(codefile, code_content).unwrap();
+    let librs_path = Path::new(template).join("src/lib.rs");
+    debug!("[New] use lib.rs path: {:?}", librs_path);
+    let librs_content = match TemplatesAsset::get(librs_path.to_str().unwrap()) {
+        Some(c) => c,
+        None => {
+            error!("Template lib.rs not found: {}", template);
+            return false;
+        }
+    };
+    let librs_target = Path::new(name).join("src/lib.rs");
+    std::fs::create_dir_all(librs_target.parent().unwrap()).unwrap();
+    std::fs::write(librs_target, librs_content.data).unwrap();
+    return true;
 }
 
 #[derive(Debug, Serialize, Deserialize)]

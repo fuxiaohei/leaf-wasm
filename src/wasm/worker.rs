@@ -103,7 +103,7 @@ async fn run_wasm_worker_test() {
     use super::Worker;
     use crate::wit::Request;
 
-    let sample_wasm_file = "./etc/sample.wasm";
+    let sample_wasm_file = "./tests/sample.wasm";
 
     let mut worker = Worker::new(sample_wasm_file).await.unwrap();
 
