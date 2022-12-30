@@ -4,6 +4,7 @@ use clap::Args;
 use log::{error, info};
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use which::which;
 use wit_component::ComponentEncoder;
 
 #[derive(Args, Debug)]
@@ -11,6 +12,9 @@ pub struct CompileCommand {
     /// Set output filename
     #[clap(long)]
     pub output: Option<String>,
+    /// Set optimization progress
+    #[clap(long, default_value("false"))]
+    pub optimize: bool,
 }
 
 impl CompileCommand {
@@ -26,12 +30,12 @@ impl CompileCommand {
         };
         info!("Read manifest '{:?}'", manifest_file);
         if manifest.language == PROJECT_LANGUAGE_RUST {
-            do_rust_compile(&manifest);
+            do_rust_compile(&manifest, self.optimize);
         }
     }
 }
 
-fn do_rust_compile(manifest: &Manifest) {
+fn do_rust_compile(manifest: &Manifest, is_optimize: bool) {
     // run cargo build --release wasm32-unknow-unknown
     let child = Command::new("cargo")
         .arg("build")
@@ -58,7 +62,36 @@ fn do_rust_compile(manifest: &Manifest) {
     if !PathBuf::from(&target_wasm_file).exists() {
         panic!("Wasm file not found: {}", &target_wasm_file);
     }
+    if is_optimize {
+        try_wasm_optimize(&target_wasm_file);
+    }
     convert_rust_component(&target_wasm_file);
+}
+
+fn try_wasm_optimize(path: &str) {
+    let cmd = match which("wasm-opt") {
+        Ok(cmd) => cmd,
+        Err(_) => {
+            info!("Command wasm-opt not found, skip wasm-opt");
+            return;
+        }
+    };
+    let child = Command::new(cmd)
+        .arg("--strip-debug")
+        .arg("-o")
+        .arg(path)
+        .arg(path)
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("failed to execute wasm-opt child process");
+    let output = child
+        .wait_with_output()
+        .expect("failed to wait on wasm-opt child process");
+    if output.status.success() {
+        info!("Wasm-opt success");
+    } else {
+        panic!("Wasm-opt failed: {:?}", output);
+    }
 }
 
 fn convert_rust_component(path: &str) {
