@@ -96,7 +96,7 @@ fn try_wasm_optimize(path: &str) {
 
 fn convert_rust_component(path: &str) {
     let file_bytes = std::fs::read(path).expect("Read wasm file error");
-    let wasi_adapter = include_bytes!("../../../wit/wasi_snapshot_preview1.wasm");
+    let wasi_adapter = include_bytes!("../../wit/wasi_snapshot_preview1.wasm");
 
     let component = ComponentEncoder::default()
         .module(file_bytes.as_slice())

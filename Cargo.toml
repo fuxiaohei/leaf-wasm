@@ -37,6 +37,10 @@ vergen = "7.4.4"
 name = "leaf-cli"
 path = "src/cli.rs"
 
+[[bin]]
+name = "leaf-runner"
+path = "src/runner.rs"
+
 [workspace]
 members =[
     "crates/leaf-codegen",

@@ -1,30 +1,30 @@
-use clap::Parser;
-mod cmd;
+mod base;
+mod cmd_cli;
 mod common;
 mod server;
 mod wasm;
 mod wit;
 
-use cmd::cli;
+use clap::Parser;
 
 /// Leaf Command line
 #[derive(Parser)]
 #[clap(
     name = "leaf-cli",
-    version = cmd::get_version(),
+    version = base::get_version(),
 )]
 enum LeafCli {
     /// New creates a new leaf project
-    New(cli::NewCommand),
+    New(cmd_cli::NewCommand),
     /// Compile compiles the leaf project
-    Compile(cli::CompileCommand),
+    Compile(cmd_cli::CompileCommand),
     /// Up runs the leaf project
-    Up(cli::UpCommand),
+    Up(cmd_cli::UpCommand),
 }
 
 #[tokio::main]
 async fn main() {
-    cmd::init_tracing();
+    base::init_tracing();
 
     let args = LeafCli::parse();
     match args {

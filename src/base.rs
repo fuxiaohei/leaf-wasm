@@ -1,5 +1,3 @@
-pub mod cli;
-
 use lazy_static::lazy_static;
 
 /// build_info returns the version information of the current build.
