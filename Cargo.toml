@@ -31,11 +31,11 @@ wit-component =  { workspace = true }
 
 [build-dependencies]
 leaf-codegen = { path = "./crates/leaf-codegen" }
-vergen = "7.4.2"
+vergen = "7.4.4"
 
 [[bin]]
 name = "leaf-cli"
-path = "src/main.rs"
+path = "src/cli.rs"
 
 [workspace]
 members =[

@@ -63,11 +63,9 @@ impl http_fetch::HttpFetch for FetchImpl {
             return Ok(Err(HttpError::InvalidRequest));
         }
 
-        let fetch_response: httpResponse<hyper::Body>;
-
         // check uri schema is https
-        let is_https = uri.scheme_str().unwrap().to_string() == "https";
-        if is_https {
+        let is_https = uri.scheme_str().unwrap() == "https";
+        let fetch_response: httpResponse<hyper::Body> = if is_https {
             let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
                 .with_native_roots()
                 .https_only()
@@ -81,7 +79,7 @@ impl http_fetch::HttpFetch for FetchImpl {
             timeout.set_write_timeout(Some(Duration::from_secs(options.timeout as u64)));
 
             let client = Client::builder().build(timeout);
-            fetch_response = match client.request(fetch_request).await {
+            match client.request(fetch_request).await {
                 Ok(r) => r,
                 Err(e) => {
                     warn!(
@@ -92,7 +90,7 @@ impl http_fetch::HttpFetch for FetchImpl {
                     );
                     return Ok(Err(HttpError::InvalidRequest));
                 }
-            };
+            }
         } else {
             let default_connector = hyper::client::HttpConnector::new();
 
@@ -100,9 +98,9 @@ impl http_fetch::HttpFetch for FetchImpl {
             timeout.set_connect_timeout(Some(Duration::from_secs(options.timeout as u64)));
             timeout.set_read_timeout(Some(Duration::from_secs(options.timeout as u64)));
             timeout.set_write_timeout(Some(Duration::from_secs(options.timeout as u64)));
-            
+
             let client = Client::builder().build(timeout);
-            fetch_response = match client.request(fetch_request).await {
+            match client.request(fetch_request).await {
                 Ok(r) => r,
                 Err(e) => {
                     warn!(
@@ -113,8 +111,8 @@ impl http_fetch::HttpFetch for FetchImpl {
                     );
                     return Ok(Err(HttpError::InvalidRequest));
                 }
-            };
-        }
+            }
+        };
 
         let mut resp_headers = vec![];
         for (key, value) in fetch_response.headers() {

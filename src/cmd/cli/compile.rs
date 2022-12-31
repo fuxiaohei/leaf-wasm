@@ -1,5 +1,5 @@
 use super::Manifest;
-use crate::vars::{DEFAULT_MANIFEST_FILE, PROJECT_LANGUAGE_RUST, RUST_TARGET_WASM_RELEASE_DIR};
+use crate::common::vars::{DEFAULT_MANIFEST_FILE, PROJECT_LANGUAGE_RUST, RUST_TARGET_WASM_RELEASE_DIR};
 use clap::Args;
 use log::{error, info};
 use std::path::PathBuf;
@@ -96,7 +96,7 @@ fn try_wasm_optimize(path: &str) {
 
 fn convert_rust_component(path: &str) {
     let file_bytes = std::fs::read(path).expect("Read wasm file error");
-    let wasi_adapter = include_bytes!("../../wit/wasi_snapshot_preview1.wasm");
+    let wasi_adapter = include_bytes!("../../../wit/wasi_snapshot_preview1.wasm");
 
     let component = ComponentEncoder::default()
         .module(file_bytes.as_slice())

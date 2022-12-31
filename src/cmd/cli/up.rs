@@ -1,7 +1,7 @@
 use super::Manifest;
 use crate::{
     server,
-    vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR},
+    common::vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR},
 };
 use clap::Args;
 use log::{error, info};

@@ -1,6 +1,6 @@
-use crate::embed::TemplatesAsset;
-use crate::errors::Error;
-use crate::vars::DEFAULT_MANIFEST_FILE;
+use crate::common::embed::TemplatesAsset;
+use crate::common::errors::Error;
+use crate::common::vars::DEFAULT_MANIFEST_FILE;
 use clap::Args;
 use log::{debug, error, info};
 use serde_derive::{Deserialize, Serialize};
@@ -92,7 +92,7 @@ fn create_project(name: &str, template: &str) -> bool {
     let librs_target = Path::new(name).join("src/lib.rs");
     std::fs::create_dir_all(librs_target.parent().unwrap()).unwrap();
     std::fs::write(librs_target, librs_content.data).unwrap();
-    return true;
+    true
 }
 
 #[derive(Debug, Serialize, Deserialize)]

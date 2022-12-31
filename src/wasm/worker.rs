@@ -1,4 +1,4 @@
-use crate::errors::Error;
+use crate::common::errors::Error;
 use crate::wit::{fetch, LeafHttp};
 use log::info;
 use tokio::time::Instant;
@@ -63,8 +63,8 @@ impl Worker {
         })
     }
 
-    /// Renew the instance of the worker. 
-    /// If the worker is trapped, it can't be re-used, show 'cannot reenter component instance'. 
+    /// Renew the instance of the worker.
+    /// If the worker is trapped, it can't be re-used, show 'cannot reenter component instance'.
     /// We need to create a new instance.
     pub async fn renew(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();

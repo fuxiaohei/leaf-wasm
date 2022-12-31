@@ -16,7 +16,7 @@ impl Manager {
 #[async_trait]
 impl managed::Manager for Manager {
     type Type = Worker;
-    type Error = crate::errors::Error;
+    type Error = crate::common::errors::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
         Ok(Worker::new(&self.path).await?)

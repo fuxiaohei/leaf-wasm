@@ -1,4 +1,4 @@
-use crate::errors::Error;
+use crate::common::errors::Error;
 use crate::wasm::{Manager, Pool};
 use crate::wit::{Request as LeafRequest, Response as LeafResponse};
 use futures::future::{self, Ready};
@@ -56,22 +56,20 @@ impl Service<Request<Body>> for ServiceContext {
             };
             let worker = worker.as_mut();
 
-            if worker.is_trapped {
-                if worker.renew().await.is_err() {
-                    warn!(
-                        "[Request] id={} {} {}, failed: {}",
-                        req_id,
-                        req.method(),
-                        req.uri(),
-                        "renew worker failed"
-                    );
-                    return Ok(create_error_response(
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        "renew worker failed".to_string(),
-                    ));
-                }
+            if worker.is_trapped && worker.renew().await.is_err() {
+                warn!(
+                    "[Request] id={} {} {}, failed: {}",
+                    req_id,
+                    req.method(),
+                    req.uri(),
+                    "renew worker failed"
+                );
+                return Ok(create_error_response(
+                    StatusCode::INTERNAL_SERVER_ERROR,
+                    "renew worker failed".to_string(),
+                ));
             }
-            
+
             worker.store.data_mut().req_id = req_id;
 
             // convert hyper Request to wasm request
@@ -144,7 +142,7 @@ pub struct ServerContext {
 }
 
 impl ServerContext {
-    pub fn new(wasm_file: String) -> Result<Self, crate::errors::Error> {
+    pub fn new(wasm_file: String) -> Result<Self, Error> {
         let mgr = Manager::new(wasm_file);
         let pool = Pool::builder(mgr)
             .build()
