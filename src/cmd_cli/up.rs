@@ -1,8 +1,5 @@
 use super::Manifest;
-use crate::{
-    server,
-    common::vars::{DEFAULT_MANIFEST_FILE, RUST_TARGET_WASM_RELEASE_DIR},
-};
+use crate::{common::vars::DEFAULT_MANIFEST_FILE, server};
 use clap::Args;
 use log::{error, info};
 use std::net::SocketAddr;
@@ -27,12 +24,13 @@ impl UpCommand {
         };
         info!("[Main] read manifest '{:?}'", manifest_file);
 
-        // find wasm file
-        let wasm_file = format!(
-            "{}/{}.wasm",
-            RUST_TARGET_WASM_RELEASE_DIR,
-            manifest.name.replace('-', "_")
-        );
+        let wasm_file = match manifest.determine_target() {
+            Ok(file) => file,
+            Err(e) => {
+                error!("[Main] find wasm error: {}", e);
+                return;
+            }
+        };
 
         if !std::path::PathBuf::from(&wasm_file).exists() {
             error!("[Worker] file not found: {}", &wasm_file);

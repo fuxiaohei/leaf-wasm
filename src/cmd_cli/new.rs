@@ -1,6 +1,7 @@
 use crate::common::embed::TemplatesAsset;
 use crate::common::errors::Error;
-use crate::common::vars::DEFAULT_MANIFEST_FILE;
+use crate::common::vars::*;
+use anyhow::Result;
 use clap::Args;
 use log::{debug, error, info};
 use serde_derive::{Deserialize, Serialize};
@@ -130,5 +131,15 @@ impl Manifest {
         let content = toml::to_string(&self).map_err(Error::MarshalManifestToml)?;
         std::fs::write(file, content).map_err(|e| Error::WriteManifestFile(e, file.to_string()))?;
         Ok(())
+    }
+
+    /// determine target file
+    pub fn determine_target(&self) -> Result<String> {
+        let name = self.name.replace('-', "_");
+        match self.language.as_str() {
+            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
+            PROJECT_LANGUAGE_JS => Ok(format!("{}/{}.wasm", JS_TARGET_WASM_RELEASE_DIR, name)),
+            _ => Err(anyhow::Error::msg("unknown language")),
+        }
     }
 }

@@ -34,7 +34,7 @@ impl Worker {
             .map_err(|e| Error::ReadWasmComponent(e, String::from(path)))?;
 
         // add the fetch implementation to the store
-        let fetch_impl = fetch::FetchImpl { req_id: 0 };
+        let fetch_impl = fetch::FetchImpl::new(0);
         let mut store = Store::new(&engine, fetch_impl);
 
         // add the fetch implementation to the linker
@@ -69,7 +69,7 @@ impl Worker {
     pub async fn renew(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
 
-        let fetch_impl = fetch::FetchImpl { req_id: 0 };
+        let fetch_impl = fetch::FetchImpl::new(0);
         let mut store = Store::new(&self.engine, fetch_impl);
         let mut linker: Linker<fetch::FetchImpl> = Linker::new(&self.engine);
         fetch::add_to_linker(&mut linker, |f: &mut fetch::FetchImpl| f)

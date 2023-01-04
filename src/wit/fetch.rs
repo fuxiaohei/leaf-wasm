@@ -24,6 +24,13 @@ impl Default for FetchOptions {
 
 pub struct FetchImpl {
     pub req_id: u64,
+    pub counter: u16,
+}
+
+impl FetchImpl {
+    pub fn new(req_id: u64) -> Self {
+        FetchImpl { req_id, counter: 0 }
+    }
 }
 
 #[async_trait]
@@ -37,6 +44,7 @@ impl http_fetch::HttpFetch for FetchImpl {
             "[Fetch] request: {} {}, id={}",
             request.method, request.uri, self.req_id
         );
+        self.counter += 1;
         let st = Instant::now();
         let mut fetch_request = httpRequest::builder()
             .method(request.method.as_str())
@@ -148,7 +156,7 @@ async fn run_fetch_impl_test() {
         decompress: false,
     };
 
-    let mut fetch_impl = FetchImpl { req_id: 0 };
+    let mut fetch_impl = FetchImpl::new(0);
     let req = Request {
         method: "GET".to_string(),
         uri: "http://www.rust-lang.org".to_string(),
@@ -172,7 +180,7 @@ async fn run_fetch_impl_https_test() {
         decompress: false,
     };
 
-    let mut fetch_impl = FetchImpl { req_id: 0 };
+    let mut fetch_impl = FetchImpl::new(0);
     let req = Request {
         method: "GET".to_string(),
         uri: "https://www.rust-lang.org".to_string(),

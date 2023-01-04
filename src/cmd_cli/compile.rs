@@ -1,5 +1,5 @@
 use super::Manifest;
-use crate::common::vars::{DEFAULT_MANIFEST_FILE, PROJECT_LANGUAGE_RUST, RUST_TARGET_WASM_RELEASE_DIR};
+use crate::common::vars::*;
 use clap::Args;
 use log::{error, info};
 use std::path::PathBuf;
@@ -29,10 +29,46 @@ impl CompileCommand {
             }
         };
         info!("Read manifest '{:?}'", manifest_file);
-        if manifest.language == PROJECT_LANGUAGE_RUST {
-            do_rust_compile(&manifest, self.optimize);
+        match manifest.language.as_str() {
+            PROJECT_LANGUAGE_RUST => do_rust_compile(&manifest, self.optimize),
+            PROJECT_LANGUAGE_JS => do_js_compile(&manifest, self.optimize),
+            _ => error!("Unsupported language: {}", manifest.language),
         }
     }
+}
+
+fn do_js_compile(manifest: &Manifest, is_optimize: bool) {
+    // run cargo build --release wasm32-wasi
+    let child = Command::new("cargo")
+        .arg("build")
+        .arg("--release")
+        .arg("--target=wasm32-wasi")
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("failed to execute cargo child process");
+    let output = child
+        .wait_with_output()
+        .expect("failed to wait on cargo child process");
+    if output.status.success() {
+        info!("Cargo build wasm success");
+    } else {
+        panic!("Cargo build wasm failed: {:?}", output);
+    }
+
+    // check target wasm file
+    let target_wasm_file = format!(
+        "{}/{}.wasm",
+        JS_TARGET_WASM_RELEASE_DIR,
+        manifest.name.replace('-', "_")
+    );
+    if !PathBuf::from(&target_wasm_file).exists() {
+        panic!("Wasm file not found: {}", &target_wasm_file);
+    }
+
+    if is_optimize {
+        try_wasm_optimize(&target_wasm_file);
+    }
+    convert_rust_component(&target_wasm_file);
 }
 
 fn do_rust_compile(manifest: &Manifest, is_optimize: bool) {
