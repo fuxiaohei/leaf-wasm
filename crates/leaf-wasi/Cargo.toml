@@ -1,0 +1,12 @@
+[package]
+name = "leaf-wasi"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+wasi-common = { path = "wasi-common" }
+wasmtime = { workspace = true }
+cap-std =  { workspace = true }
