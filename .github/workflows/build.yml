@@ -27,8 +27,8 @@ jobs:
 
       - name: Build
         run: |
-          cargo run --release help
-          cargo run --release -- --version
+          cargo run --bin leaf-cli --release help
+          cargo run --bin leaf-cli --release -- --version
 
       - name: Test ABI impl
         run: |
