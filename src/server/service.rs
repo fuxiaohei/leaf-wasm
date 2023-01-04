@@ -42,11 +42,12 @@ impl Service<Request<Body>> for ServiceContext {
                 Ok(pool) => pool,
                 Err(e) => {
                     warn!(
-                        "[Request] id={} {} {}, failed: {}",
+                        "[Request] id={} {} {}, failed: {}, {}ms",
                         req_id,
                         req.method(),
                         req.uri(),
-                        e
+                        e,
+                        st.elapsed().as_millis()
                     );
                     return Ok(create_error_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
@@ -58,11 +59,12 @@ impl Service<Request<Body>> for ServiceContext {
 
             if worker.is_trapped && worker.renew().await.is_err() {
                 warn!(
-                    "[Request] id={} {} {}, failed: {}",
+                    "[Request] id={} {} {}, failed: {}, {}ms",
                     req_id,
                     req.method(),
                     req.uri(),
-                    "renew worker failed"
+                    "renew worker failed",
+                    st.elapsed().as_millis()
                 );
                 return Ok(create_error_response(
                     StatusCode::INTERNAL_SERVER_ERROR,
@@ -99,11 +101,12 @@ impl Service<Request<Body>> for ServiceContext {
                 Err(e) => {
                     worker.is_trapped = true;
                     warn!(
-                        "[Request] id={} {} {}, failed: {}",
+                        "[Request] id={} {} {}, failed: {}, {}ms",
                         req_id,
                         req.method(),
                         req.uri(),
-                        e
+                        e,
+                        st.elapsed().as_millis()
                     );
                     return Ok(Response::new(Body::from(format!("Error : {}", e))));
                 }
@@ -117,12 +120,12 @@ impl Service<Request<Body>> for ServiceContext {
             let resp = builder.body(Body::from(resp.body.unwrap())).unwrap();
 
             info!(
-                "[Request] id={} {} {} {} {}μs",
+                "[Request] id={} {} {} {} {}ms",
                 req_id,
                 req.method(),
                 req.uri(),
                 resp.status(),
-                st.elapsed().as_micros()
+                st.elapsed().as_millis()
             );
             Ok(resp)
         };
