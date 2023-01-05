@@ -72,7 +72,7 @@ impl Service<Request<Body>> for ServiceContext {
                 ));
             }
 
-            worker.store.data_mut().req_id = req_id;
+            worker.store.data_mut().fetch().req_id = req_id;
 
             // convert hyper Request to wasm request
             let mut headers: Vec<(&str, &str)> = vec![];

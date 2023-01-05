@@ -1,3 +1,4 @@
+use super::Context;
 use crate::common::errors::Error;
 use crate::wit::{fetch, LeafHttp};
 use log::info;
@@ -12,7 +13,7 @@ pub struct Worker {
     pub component: Component,
 
     pub instance: Instance,
-    pub store: Store<fetch::FetchImpl>,
+    pub store: Store<Context>,
     pub exports: LeafHttp,
 
     pub is_trapped: bool,
@@ -33,13 +34,14 @@ impl Worker {
         let component = Component::from_file(&engine, path)
             .map_err(|e| Error::ReadWasmComponent(e, String::from(path)))?;
 
-        // add the fetch implementation to the store
-        let fetch_impl = fetch::FetchImpl::new(0);
-        let mut store = Store::new(&engine, fetch_impl);
-
-        // add the fetch implementation to the linker
-        let mut linker: Linker<fetch::FetchImpl> = Linker::new(&engine);
-        fetch::add_to_linker(&mut linker, |f: &mut fetch::FetchImpl| f)
+        // use Context to init store.
+        // It contains wasi and fetch bindings.
+        let ctx = Context::new();
+        let mut store = Store::new(&engine, ctx);
+        let mut linker: Linker<Context> = Linker::new(&engine);
+        fetch::add_to_linker(&mut linker, Context::fetch)
+            .map_err(Error::InstantiateWasmComponent)?;
+        wasi_host::add_to_linker(&mut linker, Context::wasi)
             .map_err(Error::InstantiateWasmComponent)?;
 
         let (exports, instance) = LeafHttp::instantiate_async(&mut store, &component, &linker)
@@ -69,11 +71,14 @@ impl Worker {
     pub async fn renew(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
 
-        let fetch_impl = fetch::FetchImpl::new(0);
-        let mut store = Store::new(&self.engine, fetch_impl);
-        let mut linker: Linker<fetch::FetchImpl> = Linker::new(&self.engine);
-        fetch::add_to_linker(&mut linker, |f: &mut fetch::FetchImpl| f)
+        let ctx = Context::new();
+        let mut store = Store::new(&self.engine, ctx);
+        let mut linker: Linker<Context> = Linker::new(&self.engine);
+        fetch::add_to_linker(&mut linker, Context::fetch)
             .map_err(Error::InstantiateWasmComponent)?;
+        wasi_host::add_to_linker(&mut linker, Context::wasi)
+            .map_err(Error::InstantiateWasmComponent)?;
+
         let (exports, instance) = LeafHttp::instantiate_async(&mut store, &self.component, &linker)
             .await
             .map_err(Error::InstantiateWasmComponent)?;
