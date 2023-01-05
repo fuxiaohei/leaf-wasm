@@ -42,7 +42,7 @@ impl Service<Request<Body>> for ServiceContext {
                 Ok(pool) => pool,
                 Err(e) => {
                     warn!(
-                        "[Request] id={} {} {}, failed: {}, {}ms",
+                        "[Request] id={} {} {}, get from pool failed: {:?}, {}ms",
                         req_id,
                         req.method(),
                         req.uri(),
@@ -57,19 +57,24 @@ impl Service<Request<Body>> for ServiceContext {
             };
             let worker = worker.as_mut();
 
-            if worker.is_trapped && worker.renew().await.is_err() {
-                warn!(
-                    "[Request] id={} {} {}, failed: {}, {}ms",
-                    req_id,
-                    req.method(),
-                    req.uri(),
-                    "renew worker failed",
-                    st.elapsed().as_millis()
-                );
-                return Ok(create_error_response(
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "renew worker failed".to_string(),
-                ));
+            if worker.is_trapped {
+                match worker.renew().await {
+                    Ok(_) => {}
+                    Err(e) => {
+                        warn!(
+                            "[Request] id={} {} {}, renew failed: {:?}, {}ms",
+                            req_id,
+                            req.method(),
+                            req.uri(),
+                            e,
+                            st.elapsed().as_millis()
+                        );
+                        return Ok(create_error_response(
+                            StatusCode::INTERNAL_SERVER_ERROR,
+                            e.to_string(),
+                        ));
+                    }
+                }
             }
 
             worker.store.data_mut().fetch().req_id = req_id;
@@ -101,7 +106,7 @@ impl Service<Request<Body>> for ServiceContext {
                 Err(e) => {
                     worker.is_trapped = true;
                     warn!(
-                        "[Request] id={} {} {}, failed: {}, {}ms",
+                        "[Request] id={} {} {}, execute failed: {:?}, {}ms",
                         req_id,
                         req.method(),
                         req.uri(),
