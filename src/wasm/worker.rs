@@ -85,6 +85,7 @@ impl Worker {
         self.exports = exports;
         self.instance = instance;
         self.store = store;
+        self.is_trapped = false;
 
         info!(
             "[Worker] renew instance, path: {}, took: {:?} ms",

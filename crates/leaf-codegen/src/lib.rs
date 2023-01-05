@@ -1,11 +1,9 @@
-use anyhow::Context;
-use anyhow::Result;
-use std::path::Path;
-use std::path::PathBuf;
+use anyhow::{Context, Result};
+use std::path::{Path, PathBuf};
 use wit_bindgen_gen_guest_rust::Opts;
 use wit_parser::World;
 
-fn parse_world(s: &str) -> Result<World> {
+pub fn parse_world(s: &str) -> Result<World> {
     let path = Path::new(s);
     if !path.is_file() {
         panic!("wit file `{}` does not exist", path.display());
