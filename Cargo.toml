@@ -25,6 +25,8 @@ tokio = { version = "1.22.0", features = ["full"] }
 toml = "0.5.9"
 tracing = { version = "0.1.37", features = ["max_level_debug", "release_max_level_info"] }
 tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
+wasi-common =  { git = "https://github.com/bytecodealliance/preview2-prototyping" }
+wasi-host = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "host" }
 wasmtime = { workspace = true }
 which = "4.3.0"
 wit-component =  { workspace = true }
