@@ -142,4 +142,13 @@ impl Manifest {
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
+
+    /// determin compile target
+    pub fn determine_compile_target(&self) -> Result<String> {
+        match self.language.as_str() {
+            PROJECT_LANGUAGE_RUST => Ok(COMPILE_TARGET_WASM32_UNKNOWN_UNKNOWN.to_string()),
+            PROJECT_LANGUAGE_JS => Ok(COMPILE_TARGET_WASM32_WASI.to_string()),
+            _ => Err(anyhow::Error::msg("unknown compile target")),
+        }
+    }
 }
