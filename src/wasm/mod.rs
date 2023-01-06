@@ -1,9 +1,9 @@
-mod worker;
-pub use worker::Worker;
+mod pre_worker;
+pub use pre_worker::PreWorker;
 
 mod pool;
-pub use pool::Manager;
-pub use pool::Pool;
+pub use pool::PreManager;
+pub use pool::PrePool;
 
 mod context;
 pub use context::Context;

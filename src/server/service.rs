@@ -1,6 +1,6 @@
 use crate::common::errors::Error;
-use crate::wasm::{Manager, Pool};
-use crate::wit::{Request as LeafRequest, Response as LeafResponse};
+use crate::wasm::{PreManager, PrePool};
+use crate::wit::{LeafHttp, Request as LeafRequest, Response as LeafResponse};
 use futures::future::{self, Ready};
 use hyper::{
     body::Body, http::StatusCode, server::conn::AddrStream, service::Service, Request, Response,
@@ -15,8 +15,9 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::time::Instant;
+use wasmtime::Store;
 
-static POOL: OnceCell<Pool> = OnceCell::new();
+static PRE_POOL: OnceCell<PrePool> = OnceCell::new();
 
 pub struct ServiceContext {
     pub req_id: Arc<AtomicU64>,
@@ -37,17 +38,17 @@ impl Service<Request<Body>> for ServiceContext {
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
         let fut = async move {
             let st = Instant::now();
-            let pool = POOL.get().unwrap();
-            let mut worker = match pool.get().await {
+            let pool = PRE_POOL.get().unwrap();
+            let worker = match pool.get().await {
                 Ok(pool) => pool,
                 Err(e) => {
                     warn!(
-                        "[Request] id={} {} {}, get from pool failed: {:?}, {}ms",
+                        "[Request] id={} {} {}, get from pool failed: {:?}, {:?}",
                         req_id,
                         req.method(),
                         req.uri(),
                         e,
-                        st.elapsed().as_millis()
+                        st.elapsed()
                     );
                     return Ok(create_error_response(
                         StatusCode::INTERNAL_SERVER_ERROR,
@@ -55,29 +56,15 @@ impl Service<Request<Body>> for ServiceContext {
                     ));
                 }
             };
-            let worker = worker.as_mut();
-
-            if worker.is_trapped {
-                match worker.renew().await {
-                    Ok(_) => {}
-                    Err(e) => {
-                        warn!(
-                            "[Request] id={} {} {}, renew failed: {:?}, {}ms",
-                            req_id,
-                            req.method(),
-                            req.uri(),
-                            e,
-                            st.elapsed().as_millis()
-                        );
-                        return Ok(create_error_response(
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            e.to_string(),
-                        ));
-                    }
-                }
-            }
-
-            worker.store.data_mut().fetch().req_id = req_id;
+            let mut context = crate::wasm::Context::new();
+            context.fetch().req_id = req_id;
+            let mut store = Store::new(&worker.engine, context);
+            let instance = worker
+                .instance_pre
+                .instantiate_async(&mut store)
+                .await
+                .unwrap();
+            let exports = LeafHttp::new(&mut store, &instance).unwrap();
 
             // convert hyper Request to wasm request
             let mut headers: Vec<(&str, &str)> = vec![];
@@ -97,21 +84,16 @@ impl Service<Request<Body>> for ServiceContext {
                 body: Some(&body_bytes),
             };
 
-            let resp: LeafResponse = match worker
-                .exports
-                .handle_request(&mut worker.store, leaf_req)
-                .await
-            {
+            let resp: LeafResponse = match exports.handle_request(&mut store, leaf_req).await {
                 Ok(r) => r,
                 Err(e) => {
-                    worker.is_trapped = true;
                     warn!(
-                        "[Request] id={} {} {}, execute failed: {:?}, {}ms",
+                        "[Request] id={} {} {}, execute failed: {:?}, {:?}",
                         req_id,
                         req.method(),
                         req.uri(),
                         e,
-                        st.elapsed().as_millis()
+                        st.elapsed()
                     );
                     return Ok(Response::new(Body::from(format!("Error : {}", e))));
                 }
@@ -125,12 +107,12 @@ impl Service<Request<Body>> for ServiceContext {
             let resp = builder.body(Body::from(resp.body.unwrap())).unwrap();
 
             info!(
-                "[Request] id={} {} {} {} {}ms",
+                "[Request] id={} {} {} {} {:?}",
                 req_id,
                 req.method(),
                 req.uri(),
                 resp.status(),
-                st.elapsed().as_millis()
+                st.elapsed()
             );
             Ok(resp)
         };
@@ -151,18 +133,17 @@ pub struct ServerContext {
 
 impl ServerContext {
     pub fn new(wasm_file: String) -> Result<Self, Error> {
-        let mgr = Manager::new(wasm_file);
-        let pool = Pool::builder(mgr)
+        let pre_mgr = PreManager::new(wasm_file);
+        let pre_pool = PrePool::builder(pre_mgr)
             .build()
             .map_err(|e| Error::InitComponentManagerPool(anyhow::anyhow!(e)))?;
-        match POOL.set(pool) {
-            Ok(_) => Ok(Self {
-                req_id: Arc::new(AtomicU64::new(1)),
-            }),
-            Err(_) => Err(Error::InitComponentManagerPool(anyhow::anyhow!(
-                "Failed to set pool"
-            ))),
-        }
+        PRE_POOL.set(pre_pool).map_err(|e| {
+            Error::InitComponentManagerPool(anyhow::anyhow!("Failed to set pre_pool : {:?}", e))
+        })?;
+
+        Ok(Self {
+            req_id: Arc::new(AtomicU64::new(1)),
+        })
     }
 }
 
