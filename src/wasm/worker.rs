@@ -121,7 +121,6 @@ impl Worker {
         &mut self,
         req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
-        let start_time = Instant::now();
         let mut store = self.store.as_mut().unwrap();
         store.data_mut().fetch().req_id = req.id;
         let exports = self.exports.as_ref().unwrap();
@@ -129,11 +128,6 @@ impl Worker {
             .handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
-        info!(
-            "[Worker] handle request, path: {}, took: {:?} ms",
-            self.path.clone(),
-            start_time.elapsed().as_millis()
-        );
         Ok(res)
     }
 
@@ -141,7 +135,6 @@ impl Worker {
         &mut self,
         req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
-        let start_time = Instant::now();
         let context = Context::new(req.id);
         let mut store = Store::new(&self.engine, context);
         let instance = self
@@ -157,11 +150,6 @@ impl Worker {
             .handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
-        info!(
-            "[Worker] handle request, path: {}, took: {:?} ms",
-            self.path.clone(),
-            start_time.elapsed().as_millis()
-        );
         Ok(res)
     }
 

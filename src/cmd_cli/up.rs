@@ -51,7 +51,7 @@ impl UpCommand {
                 };
             }
 
-            match manifest.determine_target() {
+            match manifest.determine_optimized_target() {
                 Ok(file) => file,
                 Err(e) => {
                     error!("[Main] find wasm error: {}", e);

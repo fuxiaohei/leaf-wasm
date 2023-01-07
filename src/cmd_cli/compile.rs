@@ -39,6 +39,7 @@ impl CompileCommand {
     }
 
     fn do_compile(&self, manifest: &Manifest) -> anyhow::Result<()> {
+        // run cargo build --target wasm32-wasi/wasm32-unknown-unknown
         let mut cmd = Command::new("cargo");
         cmd.arg("build");
         if !self.debug {
@@ -58,15 +59,58 @@ impl CompileCommand {
         } else {
             return Err(anyhow::anyhow!("Cargo build wasm failed: {:?}", output));
         }
-        let target_wasm_file = manifest.determine_target()?;
+        let mut target_wasm_file = manifest.determine_compiling_target()?;
         if !PathBuf::from(&target_wasm_file).exists() {
             return Err(anyhow::anyhow!("Wasm file not found: {}", target_wasm_file));
         }
+
+        // try use wizer to optimize wasm from js
+        if manifest.language == PROJECT_LANGUAGE_JS {
+            target_wasm_file = self.try_wizer(&target_wasm_file)?;
+        }
+
+        // try use wasm-opt to optimize wasm
         if self.optimize {
             self.try_wasm_optimize(&target_wasm_file);
         }
+
+        // convert wasm module to component
         self.convert_rust_component(&target_wasm_file);
         Ok(())
+    }
+
+    fn try_wizer(&self, path: &str) -> anyhow::Result<String> {
+        // js need wizer command
+        let cmd = match which("wizer") {
+                    Ok(cmd) => cmd,
+                    Err(_) => {
+                        return Err(anyhow::anyhow!(
+                            "Wizer not found \n\tplease install wizer first: \n\tcargo install wizer --all-features\n\tmore infomation see: https://github.com/bytecodealliance/wizer"
+                        ))
+                    }
+                };
+
+        // wizer leaf_wasm_js.wasm -o leaf_wasm_js_wizer.wasm --allow-wasi --inherit-stdio=true --inherit-env=true
+        let target = path.replace(".wasm", "_wizer.wasm");
+        let child = Command::new(cmd)
+            .arg(path)
+            .arg("-o")
+            .arg(&target)
+            .arg("--allow-wasi")
+            .arg("--inherit-stdio=true")
+            .arg("--inherit-env=true")
+            .stdout(Stdio::piped())
+            .spawn()
+            .expect("failed to execute wizer child process");
+        let output = child
+            .wait_with_output()
+            .expect("failed to wait on wizer child process");
+        if output.status.success() {
+            info!("wizer success");
+        } else {
+            panic!("wizer failed: {:?}", output);
+        }
+        Ok(target)
     }
 
     fn try_wasm_optimize(&self, path: &str) {

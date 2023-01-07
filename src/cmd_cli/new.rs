@@ -133,12 +133,22 @@ impl Manifest {
         Ok(())
     }
 
-    /// determine target file
-    pub fn determine_target(&self) -> Result<String> {
+    /// determine compiling target file, before optimized
+    pub fn determine_compiling_target(&self) -> Result<String> {
         let name = self.name.replace('-', "_");
         match self.language.as_str() {
             PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
             PROJECT_LANGUAGE_JS => Ok(format!("{}/{}.wasm", JS_TARGET_WASM_RELEASE_DIR, name)),
+            _ => Err(anyhow::Error::msg("unknown language")),
+        }
+    }
+
+    /// determine optimized target file
+    pub fn determine_optimized_target(&self) -> Result<String> {
+        let name = self.name.replace('-', "_");
+        match self.language.as_str() {
+            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
+            PROJECT_LANGUAGE_JS => Ok(format!("{}/{}_wizer.wasm", JS_TARGET_WASM_RELEASE_DIR, name)),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
