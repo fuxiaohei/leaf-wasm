@@ -1,23 +1,26 @@
 use super::Context;
 use crate::common::errors::Error;
-use crate::wit::{fetch, LeafHttp};
+use crate::wit::{fetch, LeafHttp, Request as LeafRequest, Response as LeafResponse};
 use log::info;
 use tokio::time::Instant;
 use wasmtime::{
-    component::{Component, Instance, Linker},
+    component::{Component, Instance, InstancePre, Linker},
     Config, Engine, Store,
 };
 
 pub struct Worker {
-    pub engine: Engine,
-    pub component: Component,
+    path: String,
+    engine: Engine,
+    component: Component,
 
-    pub instance: Instance,
-    pub store: Store<Context>,
-    pub exports: LeafHttp,
+    instance: Option<Instance>,
+    store: Option<Store<Context>>,
+    exports: Option<LeafHttp>,
+    instance_pre: Option<InstancePre<Context>>,
 
-    pub is_trapped: bool,
-    pub path: String,
+    /// Whether the worker is trapped.If the worker is trapped, it needs re-create.
+    is_trapped: bool,
+    enable_wasi: bool,
 }
 
 impl std::fmt::Debug for Worker {
@@ -27,73 +30,121 @@ impl std::fmt::Debug for Worker {
 }
 
 impl Worker {
-    pub async fn new(path: &str) -> Result<Self, Error> {
+    pub async fn new(path: &str, enable_wasi: bool) -> Result<Self, Error> {
         let start_time = Instant::now();
         let config = create_wasmtime_config();
         let engine = Engine::new(&config).map_err(Error::InitEngine)?;
         let component = Component::from_file(&engine, path)
             .map_err(|e| Error::ReadWasmComponent(e, String::from(path)))?;
 
-        // use Context to init store.
-        // It contains wasi and fetch bindings.
-        let ctx = Context::new();
-        let mut store = Store::new(&engine, ctx);
-        let mut linker: Linker<Context> = Linker::new(&engine);
-        fetch::add_to_linker(&mut linker, Context::fetch)
-            .map_err(Error::InstantiateWasmComponent)?;
-        wasi_host::add_to_linker(&mut linker, Context::wasi)
-            .map_err(Error::InstantiateWasmComponent)?;
-
-        let (exports, instance) = LeafHttp::instantiate_async(&mut store, &component, &linker)
-            .await
-            .map_err(Error::InstantiateWasmComponent)?;
+        let mut worker = Self {
+            path: String::from(path),
+            engine,
+            component,
+            instance: None,
+            store: None,
+            exports: None,
+            instance_pre: None,
+            is_trapped: false,
+            enable_wasi,
+        };
+        if worker.enable_wasi {
+            worker.create_instance_pre()?;
+        } else {
+            worker.create_instance().await?;
+        }
 
         info!(
-            "[Worker] new instance, path: {}, took: {:?} ms",
+            "[Worker] new worker, path: {}, took: {:?} ms",
             path,
             start_time.elapsed().as_millis()
         );
 
-        Ok(Self {
-            engine,
-            component,
-            instance,
-            store,
-            exports,
-            is_trapped: false,
-            path: String::from(path),
-        })
+        Ok(worker)
     }
 
-    /// Renew the instance of the worker.
-    /// If the worker is trapped, it can't be re-used, show 'cannot reenter component instance'.
-    /// We need to create a new instance.
-    pub async fn renew(&mut self) -> Result<(), Error> {
+    /// If the worker is trapped, it needs re-create instance.
+    async fn create_instance(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
-
-        let ctx = Context::new();
+        let ctx = Context::new(0);
         let mut store = Store::new(&self.engine, ctx);
+        let mut linker: Linker<Context> = Linker::new(&self.engine);
+        fetch::add_to_linker(&mut linker, Context::fetch)
+            .map_err(Error::InstantiateWasmComponent)?;
+        if self.enable_wasi {
+            wasi_host::add_to_linker(&mut linker, Context::wasi)
+                .map_err(Error::InstantiateWasmComponent)?;
+        }
+        let (exports, instance) = LeafHttp::instantiate_async(&mut store, &self.component, &linker)
+            .await
+            .map_err(Error::InstantiateWasmComponent)?;
+        self.instance = Some(instance);
+        self.store = Some(store);
+        self.exports = Some(exports);
+        self.is_trapped = false;
+        info!(
+            "[Worker] new instance, path: {}, took: {:?} ms",
+            self.path.clone(),
+            start_time.elapsed().as_millis()
+        );
+        Ok(())
+    }
+
+    /// If this worker enable wasi, use instance_pre to initialize the worker.
+    fn create_instance_pre(&mut self) -> Result<(), Error> {
+        let start_time = Instant::now();
+        // create linker
         let mut linker: Linker<Context> = Linker::new(&self.engine);
         fetch::add_to_linker(&mut linker, Context::fetch)
             .map_err(Error::InstantiateWasmComponent)?;
         wasi_host::add_to_linker(&mut linker, Context::wasi)
             .map_err(Error::InstantiateWasmComponent)?;
 
-        let (exports, instance) = LeafHttp::instantiate_async(&mut store, &self.component, &linker)
-            .await
+        // create instance_pre
+        let instance_pre = linker
+            .instantiate_pre(&self.component)
             .map_err(Error::InstantiateWasmComponent)?;
-        self.exports = exports;
-        self.instance = instance;
-        self.store = store;
+        self.instance_pre = Some(instance_pre);
         self.is_trapped = false;
-
         info!(
-            "[Worker] renew instance, path: {}, took: {:?} ms",
-            self.path,
+            "[Worker] new instance_pre, path: {}, took: {:?} ms",
+            self.path.clone(),
             start_time.elapsed().as_millis()
         );
-
         Ok(())
+    }
+
+    async fn handle_request_with_instance(
+        &mut self,
+        req: LeafRequest<'_>,
+    ) -> Result<LeafResponse, Error> {
+        let start_time = Instant::now();
+        let mut store = self.store.as_mut().unwrap();
+        let exports = self.exports.as_ref().unwrap();
+        let res = exports
+            .handle_request(&mut store, req)
+            .await
+            .map_err(Error::InvokeComponentExportFunction)?;
+        info!(
+            "[Worker] handle request, path: {}, took: {:?} ms",
+            self.path.clone(),
+            start_time.elapsed().as_millis()
+        );
+        Ok(res)
+    }
+
+    async fn handle_request_with_instance_pre(
+        &mut self,
+        _req: LeafRequest<'_>,
+    ) -> Result<LeafResponse, Error> {
+        todo!()
+    }
+
+    pub async fn handle_request(&mut self, req: LeafRequest<'_>) -> Result<LeafResponse, Error> {
+        if self.enable_wasi {
+            return self.handle_request_with_instance_pre(req).await;
+        }
+        self.handle_request_with_instance(req).await
     }
 }
 
@@ -111,22 +162,19 @@ async fn run_wasm_worker_test() {
 
     let sample_wasm_file = "./tests/sample.wasm";
 
-    let mut worker = Worker::new(sample_wasm_file).await.unwrap();
+    let mut worker = Worker::new(sample_wasm_file, false).await.unwrap();
 
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
         let req = Request {
+            id: 1,
             method: "GET",
             uri: "/abc",
             headers: &headers,
             body: Some("xxxyyy".as_bytes()),
         };
 
-        let resp = worker
-            .exports
-            .handle_request(&mut worker.store, req)
-            .await
-            .unwrap();
+        let resp = worker.handle_request(req).await.unwrap();
         assert_eq!(resp.status, 200);
         assert_eq!(resp.body, Some("xxxyyy".as_bytes().to_vec()));
 

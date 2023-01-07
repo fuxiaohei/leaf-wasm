@@ -57,28 +57,6 @@ impl Service<Request<Body>> for ServiceContext {
             };
             let worker = worker.as_mut();
 
-            if worker.is_trapped {
-                match worker.renew().await {
-                    Ok(_) => {}
-                    Err(e) => {
-                        warn!(
-                            "[Request] id={} {} {}, renew failed: {:?}, {}ms",
-                            req_id,
-                            req.method(),
-                            req.uri(),
-                            e,
-                            st.elapsed().as_millis()
-                        );
-                        return Ok(create_error_response(
-                            StatusCode::INTERNAL_SERVER_ERROR,
-                            e.to_string(),
-                        ));
-                    }
-                }
-            }
-
-            worker.store.data_mut().fetch().req_id = req_id;
-
             // convert hyper Request to wasm request
             let mut headers: Vec<(&str, &str)> = vec![];
             let req_headers = req.headers().clone();
@@ -91,20 +69,16 @@ impl Service<Request<Body>> for ServiceContext {
             let body_bytes = hyper::body::to_bytes(req.body_mut()).await?.to_vec();
 
             let leaf_req = LeafRequest {
+                id: req_id,
                 method: method.as_str(),
                 uri: url.as_str(),
                 headers: &headers,
                 body: Some(&body_bytes),
             };
 
-            let resp: LeafResponse = match worker
-                .exports
-                .handle_request(&mut worker.store, leaf_req)
-                .await
-            {
+            let resp: LeafResponse = match worker.handle_request(leaf_req).await {
                 Ok(r) => r,
                 Err(e) => {
-                    worker.is_trapped = true;
                     warn!(
                         "[Request] id={} {} {}, execute failed: {:?}, {}ms",
                         req_id,
@@ -113,7 +87,10 @@ impl Service<Request<Body>> for ServiceContext {
                         e,
                         st.elapsed().as_millis()
                     );
-                    return Ok(Response::new(Body::from(format!("Error : {}", e))));
+                    return Ok(create_error_response(
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        e.to_string(),
+                    ));
                 }
             };
 

@@ -10,6 +10,7 @@ pub mod leaf_http {
     pub type Method = String;
     #[derive(Clone)]
     pub struct Request {
+        pub id: u64,
         pub method: Method,
         pub uri: Uri,
         pub headers: Headers,
@@ -18,6 +19,7 @@ pub mod leaf_http {
     impl core::fmt::Debug for Request {
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             f.debug_struct("Request")
+                .field("id", &self.id)
                 .field("method", &self.method)
                 .field("uri", &self.uri)
                 .field("headers", &self.headers)
@@ -46,7 +48,7 @@ pub mod leaf_http {
 
     #[doc(hidden)]
     pub unsafe fn call_handle_request<T: LeafHttp>(
-        arg0: i32,
+        arg0: i64,
         arg1: i32,
         arg2: i32,
         arg3: i32,
@@ -55,11 +57,12 @@ pub mod leaf_http {
         arg6: i32,
         arg7: i32,
         arg8: i32,
+        arg9: i32,
     ) -> i32 {
-        let len0 = arg1 as usize;
-        let len1 = arg3 as usize;
-        let base4 = arg4;
-        let len4 = arg5;
+        let len0 = arg2 as usize;
+        let len1 = arg4 as usize;
+        let base4 = arg5;
+        let len4 = arg6;
         let mut result4 = Vec::with_capacity(len4 as usize);
         for i in 0..len4 {
             let base = base4 + i * 16;
@@ -85,15 +88,16 @@ pub mod leaf_http {
         }
         wit_bindgen_guest_rust::rt::dealloc(base4, (len4 as usize) * 16, 4);
         let result6 = T::handle_request(Request {
-            method: String::from_utf8(Vec::from_raw_parts(arg0 as *mut _, len0, len0)).unwrap(),
-            uri: String::from_utf8(Vec::from_raw_parts(arg2 as *mut _, len1, len1)).unwrap(),
+            id: arg0 as u64,
+            method: String::from_utf8(Vec::from_raw_parts(arg1 as *mut _, len0, len0)).unwrap(),
+            uri: String::from_utf8(Vec::from_raw_parts(arg3 as *mut _, len1, len1)).unwrap(),
             headers: result4,
-            body: match arg6 {
+            body: match arg7 {
                 0 => None,
                 1 => Some({
-                    let len5 = arg8 as usize;
+                    let len5 = arg9 as usize;
 
-                    Vec::from_raw_parts(arg7 as *mut _, len5, len5)
+                    Vec::from_raw_parts(arg8 as *mut _, len5, len5)
                 }),
                 _ => panic!("invalid enum discriminant"),
             },
@@ -198,8 +202,8 @@ macro_rules! export_leaf_http(($t:ident) => {
       #[doc(hidden)]
       #[export_name = "handle-request"]
       #[allow(non_snake_case)]
-      unsafe extern "C" fn __export_exports_handle_request(arg0: i32,arg1: i32,arg2: i32,arg3: i32,arg4: i32,arg5: i32,arg6: i32,arg7: i32,arg8: i32,) -> i32 {
-        leaf_http::call_handle_request::<$t>(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,)
+      unsafe extern "C" fn __export_exports_handle_request(arg0: i64,arg1: i32,arg2: i32,arg3: i32,arg4: i32,arg5: i32,arg6: i32,arg7: i32,arg8: i32,arg9: i32,) -> i32 {
+        leaf_http::call_handle_request::<$t>(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,)
       }
 
       #[doc(hidden)]
@@ -224,16 +228,16 @@ macro_rules! export_leaf_http(($t:ident) => {
 
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:leaf-http"]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 190] = [
-    1, 0, 9, 108, 101, 97, 102, 45, 104, 116, 116, 112, 0, 97, 115, 109, 10, 0, 1, 0, 7, 78, 10,
-    115, 115, 111, 2, 115, 115, 112, 2, 112, 125, 107, 4, 114, 4, 6, 109, 101, 116, 104, 111, 100,
-    0, 3, 117, 114, 105, 1, 7, 104, 101, 97, 100, 101, 114, 115, 3, 4, 98, 111, 100, 121, 5, 123,
-    114, 3, 6, 115, 116, 97, 116, 117, 115, 7, 7, 104, 101, 97, 100, 101, 114, 115, 3, 4, 98, 111,
-    100, 121, 5, 64, 1, 3, 114, 101, 113, 6, 0, 8, 11, 88, 8, 6, 115, 116, 97, 116, 117, 115, 0, 3,
-    7, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 3, 3, 117, 114, 105, 0, 3, 1, 4, 98, 111, 100,
-    121, 0, 3, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3, 0, 7, 114, 101, 113, 117, 101, 115, 116,
-    0, 3, 6, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0, 3, 8, 14, 104, 97, 110, 100, 108, 101,
-    45, 114, 101, 113, 117, 101, 115, 116, 0, 3, 9,
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 194] = [
+    1, 0, 9, 108, 101, 97, 102, 45, 104, 116, 116, 112, 0, 97, 115, 109, 10, 0, 1, 0, 7, 82, 10,
+    115, 115, 111, 2, 115, 115, 112, 2, 112, 125, 107, 4, 114, 5, 2, 105, 100, 119, 6, 109, 101,
+    116, 104, 111, 100, 0, 3, 117, 114, 105, 1, 7, 104, 101, 97, 100, 101, 114, 115, 3, 4, 98, 111,
+    100, 121, 5, 123, 114, 3, 6, 115, 116, 97, 116, 117, 115, 7, 7, 104, 101, 97, 100, 101, 114,
+    115, 3, 4, 98, 111, 100, 121, 5, 64, 1, 3, 114, 101, 113, 6, 0, 8, 11, 88, 8, 6, 115, 116, 97,
+    116, 117, 115, 0, 3, 7, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 3, 3, 117, 114, 105, 0, 3,
+    1, 4, 98, 111, 100, 121, 0, 3, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3, 0, 7, 114, 101, 113,
+    117, 101, 115, 116, 0, 3, 6, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0, 3, 8, 14, 104, 97,
+    110, 100, 108, 101, 45, 114, 101, 113, 117, 101, 115, 116, 0, 3, 9,
 ];
 
 #[inline(never)]

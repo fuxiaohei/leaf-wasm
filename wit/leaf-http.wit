@@ -11,6 +11,7 @@ interface exports {
     type method = string
     // request object
     record request{
+        id: u64,
         method: method,
         uri: uri,
         headers: headers,

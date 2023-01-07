@@ -31,4 +31,8 @@ pub enum Error {
     /// failed to init component manager pool
     #[error("failed to init component manager pool: {0}")]
     InitComponentManagerPool(anyhow::Error),
+
+    /// failed to invoke component export function
+    #[error("failed to invoke component export function: {0}")]
+    InvokeComponentExportFunction(anyhow::Error),
 }

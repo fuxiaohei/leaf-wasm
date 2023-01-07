@@ -13,11 +13,11 @@ impl Context {
     pub fn fetch(&mut self) -> &mut FetchImpl {
         &mut self.fetch
     }
-    pub fn new() -> Self {
+    pub fn new(req_id: u64) -> Self {
         let wasi = WasiCtxBuilder::new().build();
         Self {
             wasi,
-            fetch: FetchImpl::new(0),
+            fetch: FetchImpl::new(req_id),
         }
     }
 }
