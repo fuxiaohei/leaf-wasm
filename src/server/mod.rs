@@ -4,8 +4,8 @@ use std::net::SocketAddr;
 
 mod service;
 
-pub async fn start(addr: SocketAddr, wasm: String) {
-    let svc = match service::ServerContext::new(wasm) {
+pub async fn start(addr: SocketAddr, wasm: String, enable_wasi: bool) {
+    let svc = match service::ServerContext::new(wasm, enable_wasi) {
         Ok(svc) => svc,
         Err(e) => {
             error!("[Server] init error: {}", e);

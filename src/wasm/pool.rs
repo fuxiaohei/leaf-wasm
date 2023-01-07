@@ -5,11 +5,12 @@ use deadpool::managed;
 #[derive(Debug)]
 pub struct Manager {
     path: String,
+    enable_wasi: bool,
 }
 
 impl Manager {
-    pub fn new(path: String) -> Self {
-        Self { path }
+    pub fn new(path: String, enable_wasi: bool) -> Self {
+        Self { path, enable_wasi }
     }
 }
 
@@ -19,7 +20,7 @@ impl managed::Manager for Manager {
     type Error = crate::common::errors::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
-        Ok(Worker::new(&self.path, false).await?)
+        Ok(Worker::new(&self.path, self.enable_wasi).await?)
     }
 
     async fn recycle(&self, _obj: &mut Self::Type) -> managed::RecycleResult<Self::Error> {
@@ -35,7 +36,7 @@ async fn run_worker_pool_test() {
     use crate::wit::Request;
 
     let sample_wasm_file = "./tests/sample.wasm";
-    let mgr = Manager::new(sample_wasm_file.to_string());
+    let mgr = Manager::new(sample_wasm_file.to_string(), false);
     let pool = Pool::builder(mgr).build().unwrap();
 
     let status = pool.status();
@@ -61,7 +62,7 @@ async fn run_worker_pool_test() {
 
         let resp = worker.handle_request(req).await.unwrap();
         assert_eq!(resp.status, 200);
-        assert_eq!(resp.body, Some("xxxyyy".as_bytes().to_vec()));
+        assert_eq!(resp.body, Some("Hello, World".as_bytes().to_vec()));
     }
 
     let status = pool.status();

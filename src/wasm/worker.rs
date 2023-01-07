@@ -25,7 +25,10 @@ pub struct Worker {
 
 impl std::fmt::Debug for Worker {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::result::Result<(), std::fmt::Error> {
-        f.debug_struct("Worker").finish()
+        f.debug_struct("Worker")
+            .field("path", &self.path)
+            .field("enable_wasi", &self.enable_wasi)
+            .finish()
     }
 }
 
@@ -120,6 +123,7 @@ impl Worker {
     ) -> Result<LeafResponse, Error> {
         let start_time = Instant::now();
         let mut store = self.store.as_mut().unwrap();
+        store.data_mut().fetch().req_id = req.id;
         let exports = self.exports.as_ref().unwrap();
         let res = exports
             .handle_request(&mut store, req)
@@ -135,9 +139,30 @@ impl Worker {
 
     async fn handle_request_with_instance_pre(
         &mut self,
-        _req: LeafRequest<'_>,
+        req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
-        todo!()
+        let start_time = Instant::now();
+        let context = Context::new(req.id);
+        let mut store = Store::new(&self.engine, context);
+        let instance = self
+            .instance_pre
+            .as_ref()
+            .unwrap()
+            .instantiate_async(&mut store)
+            .await
+            .map_err(Error::InstantiateWasmComponent)?;
+        let exports =
+            LeafHttp::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
+        let res = exports
+            .handle_request(&mut store, req)
+            .await
+            .map_err(Error::InvokeComponentExportFunction)?;
+        info!(
+            "[Worker] handle request, path: {}, took: {:?} ms",
+            self.path.clone(),
+            start_time.elapsed().as_millis()
+        );
+        Ok(res)
     }
 
     pub async fn handle_request(&mut self, req: LeafRequest<'_>) -> Result<LeafResponse, Error> {
@@ -176,7 +201,43 @@ async fn run_wasm_worker_test() {
 
         let resp = worker.handle_request(req).await.unwrap();
         assert_eq!(resp.status, 200);
-        assert_eq!(resp.body, Some("xxxyyy".as_bytes().to_vec()));
+        assert_eq!(resp.body, Some("Hello, World".as_bytes().to_vec()));
+
+        let headers = resp.headers;
+        for (key, value) in headers {
+            if key == "X-Request-Method" {
+                assert_eq!(value, "GET");
+            }
+            if key == "X-Request-Url" {
+                assert_eq!(value, "/abc");
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn run_wasi_worker_test() {
+    use super::Worker;
+    use crate::wit::Request;
+
+    // TODO: use real wasi wasm file
+    let sample_wasm_file = "./tests/sample.wasm";
+
+    let mut worker = Worker::new(sample_wasm_file, true).await.unwrap();
+
+    for _ in 1..10 {
+        let headers: Vec<(&str, &str)> = vec![];
+        let req = Request {
+            id: 1,
+            method: "GET",
+            uri: "/abc",
+            headers: &headers,
+            body: Some("xxxyyy".as_bytes()),
+        };
+
+        let resp = worker.handle_request(req).await.unwrap();
+        assert_eq!(resp.status, 200);
+        assert_eq!(resp.body, Some("Hello, World".as_bytes().to_vec()));
 
         let headers = resp.headers;
         for (key, value) in headers {

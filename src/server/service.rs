@@ -127,8 +127,8 @@ pub struct ServerContext {
 }
 
 impl ServerContext {
-    pub fn new(wasm_file: String) -> Result<Self, Error> {
-        let mgr = Manager::new(wasm_file);
+    pub fn new(wasm_file: String, enable_wasi: bool) -> Result<Self, Error> {
+        let mgr = Manager::new(wasm_file, enable_wasi);
         let pool = Pool::builder(mgr)
             .build()
             .map_err(|e| Error::InitComponentManagerPool(anyhow::anyhow!(e)))?;

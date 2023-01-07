@@ -12,10 +12,14 @@ pub struct UpCommand {
     /// The wasm file to run, ignore current project
     #[clap(long)]
     pub wasm: Option<String>,
+    /// Enable wasi
+    #[clap(long, default_value("false"))]
+    pub enable_wasi: bool,
 }
 
 impl UpCommand {
     pub async fn run(&self) {
+        let mut enable_wasi = self.enable_wasi;
         let wasm_file = if self.wasm.is_some() {
             info!(
                 "[Main] use wasm file from command line: {:?}",
@@ -34,6 +38,19 @@ impl UpCommand {
             };
             info!("[Main] read manifest '{:?}'", manifest_file);
 
+            if !enable_wasi {
+                enable_wasi = match manifest.determine_enable_wasi() {
+                    Ok(enable_wasi) => {
+                        info!("[Main] enable wasm32-wasi");
+                        enable_wasi
+                    }
+                    Err(e) => {
+                        error!("determine enable_wasi error: {}", e);
+                        return;
+                    }
+                };
+            }
+
             match manifest.determine_target() {
                 Ok(file) => file,
                 Err(e) => {
@@ -51,6 +68,6 @@ impl UpCommand {
         info!("[Worker] use file: {}", &wasm_file);
 
         // start local server
-        server::start(self.addr.unwrap(), wasm_file).await;
+        server::start(self.addr.unwrap(), wasm_file, enable_wasi).await;
     }
 }
