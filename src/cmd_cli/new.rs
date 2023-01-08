@@ -93,6 +93,7 @@ fn create_project(name: &str, template: &str) -> bool {
             let content = std::str::from_utf8(&file.data).unwrap().to_string();
             let target_path = librs_target.join(src_path);
             debug!("[New] src_path: {:?}, {:?}", src_path, target_path);
+            std::fs::create_dir_all(target_path.parent().unwrap()).unwrap();
             std::fs::write(target_path, content).unwrap();
         }
     });

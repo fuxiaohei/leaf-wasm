@@ -16,6 +16,7 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
         .arg("--target")
         .arg(arch)
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("failed to execute cargo child process");
     let output = child
@@ -50,6 +51,7 @@ fn try_wasm_optimize(path: &str) {
         .arg(path)
         .arg(path)
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("failed to execute wasm-opt child process");
     let output = child
@@ -107,21 +109,32 @@ pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
         .arg("--inherit-env=true")
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("failed to execute wizer child process");
     let mut stdin = child.stdin.take().expect("failed to get stdin");
-    stdin
-        .write_all(src_content.as_slice())
-        .expect("failed to write to stdin");
+
+    std::thread::spawn(move || {
+        stdin
+            .write_all(src_content.as_slice())
+            .expect("failed to write to stdin");
+    });
 
     let output = child
         .wait_with_output()
         .expect("failed to wait on wizer child process");
     if output.status.success() {
+        // print output
+        debug!(
+            "Wizer output: \n{}",
+            std::str::from_utf8(&output.stdout).unwrap()
+        );
         info!("Wizer success: {}", &wizer_target);
     } else {
         panic!("Wizer failed: {:?}", output);
     }
+    
+    convert_rust_component(&wizer_target);
 
     Ok(())
 }
