@@ -65,34 +65,35 @@ impl NewCommand {
 }
 
 fn create_project(name: &str, template: &str) -> bool {
+    // copy cargo.toml
     let cargotoml_path = Path::new(template).join("Cargo.toml.tpl");
     debug!("[New] use cargo.toml path: {:?}", cargotoml_path);
-    let cargotoml_content = match TemplatesAsset::get(cargotoml_path.to_str().unwrap()) {
-        Some(c) => c,
-        None => {
-            error!("Template toml not found: {}", template);
-            return false;
-        }
-    };
-    let mut cargotoml_content = std::str::from_utf8(&cargotoml_content.data)
-        .unwrap()
-        .to_string();
-    cargotoml_content = cargotoml_content.replace("{{name}}", name);
-    let cargotoml = Path::new(name).join("Cargo.toml");
-    std::fs::write(cargotoml, cargotoml_content).unwrap();
+    TemplatesAsset::get(cargotoml_path.to_str().unwrap()).map(|c| {
+        let mut cargotoml_content = std::str::from_utf8(&c.data).unwrap().to_string();
+        cargotoml_content = cargotoml_content.replace("{{name}}", name);
+        let cargotoml = Path::new(name).join("Cargo.toml");
+        std::fs::write(cargotoml, cargotoml_content).unwrap();
+    });
 
-    let librs_path = Path::new(template).join("src/lib.rs");
-    debug!("[New] use lib.rs path: {:?}", librs_path);
-    let librs_content = match TemplatesAsset::get(librs_path.to_str().unwrap()) {
-        Some(c) => c,
-        None => {
-            error!("Template lib.rs not found: {}", template);
-            return false;
-        }
-    };
-    let librs_target = Path::new(name).join("src/lib.rs");
+    // create src dir
+    let librs_target = Path::new(name).join("src");
     std::fs::create_dir_all(librs_target.parent().unwrap()).unwrap();
-    std::fs::write(librs_target, librs_content.data).unwrap();
+
+    // copy src files
+    let librs_path = Path::new(template).join("src");
+    TemplatesAsset::iter().for_each(|t| {
+        if t.starts_with(librs_path.to_str().unwrap()) {
+            let src_path = Path::new(t.as_ref())
+                .strip_prefix(librs_path.to_str().unwrap())
+                .unwrap();
+            let file = TemplatesAsset::get(t.as_ref()).unwrap();
+            let content = std::str::from_utf8(&file.data).unwrap().to_string();
+            let target_path = librs_target.join(src_path);
+            debug!("[New] src_path: {:?}, {:?}", src_path, target_path);
+            std::fs::write(target_path, content).unwrap();
+        }
+    });
+
     true
 }
 
@@ -148,7 +149,10 @@ impl Manifest {
         let name = self.name.replace('-', "_");
         match self.language.as_str() {
             PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
-            PROJECT_LANGUAGE_JS => Ok(format!("{}/{}_wizer.wasm", JS_TARGET_WASM_RELEASE_DIR, name)),
+            PROJECT_LANGUAGE_JS => Ok(format!(
+                "{}/{}_wizer.wasm",
+                JS_TARGET_WASM_RELEASE_DIR, name
+            )),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
