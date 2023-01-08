@@ -23,6 +23,9 @@ impl NewCommand {
             if template.contains("rust") {
                 return String::from("rust");
             }
+            if template.contains("js") {
+                return String::from("js");
+            }
         }
         String::from("rust")
     }
@@ -139,7 +142,7 @@ impl Manifest {
         let name = self.name.replace('-', "_");
         match self.language.as_str() {
             PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
-            PROJECT_LANGUAGE_JS => Ok(format!("{}/{}.wasm", JS_TARGET_WASM_RELEASE_DIR, name)),
+            PROJECT_LANGUAGE_JS => Ok(format!("{}.wasm", name)),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
@@ -149,16 +152,13 @@ impl Manifest {
         let name = self.name.replace('-', "_");
         match self.language.as_str() {
             PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", RUST_TARGET_WASM_RELEASE_DIR, name)),
-            PROJECT_LANGUAGE_JS => Ok(format!(
-                "{}/{}_wizer.wasm",
-                JS_TARGET_WASM_RELEASE_DIR, name
-            )),
+            PROJECT_LANGUAGE_JS => Ok(format!("{}_wizer.wasm", name)),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
 
-    /// determine compile target
-    pub fn determine_compile_target(&self) -> Result<String> {
+    /// determine compile arch
+    pub fn determine_compile_arch(&self) -> Result<String> {
         match self.language.as_str() {
             PROJECT_LANGUAGE_RUST => Ok(COMPILE_TARGET_WASM32_UNKNOWN_UNKNOWN.to_string()),
             PROJECT_LANGUAGE_JS => Ok(COMPILE_TARGET_WASM32_WASI.to_string()),

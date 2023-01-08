@@ -5,10 +5,12 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-anyhow = { workspace = true}
-thiserror = {workspace =true}
-wasmtime = { workspace =true }
-wit-bindgen-core = { workspace =true }
-wit-bindgen-gen-guest-rust ={ workspace =true }
-wit-component = { workspace =true }
-wit-parser = { workspace =true }
+anyhow = { workspace = true }
+log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
+thiserror = { workspace = true }
+wasmtime = { workspace = true }
+which = "4.3.0"
+wit-bindgen-core = { workspace = true }
+wit-bindgen-gen-guest-rust ={ workspace = true }
+wit-component = { workspace = true }
+wit-parser = { workspace = true }

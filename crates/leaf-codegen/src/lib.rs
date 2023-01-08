@@ -47,3 +47,5 @@ pub fn guest_rust_code_gen(fpath: &str) -> Result<(String, String)> {
     }
     Err(anyhow::anyhow!("{} not found in generator", rs_path))
 }
+
+pub mod compile;
