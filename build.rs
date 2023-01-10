@@ -1,4 +1,3 @@
-use leaf_codegen::guest_rust_code_gen;
 use std::path::Path;
 
 fn main() {
@@ -26,7 +25,7 @@ fn build_wit_guest_code() {
             continue;
         }
         let (target_rs, target_rs_content) =
-            guest_rust_code_gen(wit_file_path.to_str().unwrap()).unwrap();
+            leaf_compiler::gen_rust_guest_code(wit_file_path.to_str().unwrap()).unwrap();
         std::fs::write(target_rs, target_rs_content).unwrap();
     }
 }

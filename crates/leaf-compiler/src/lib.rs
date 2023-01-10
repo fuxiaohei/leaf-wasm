@@ -19,7 +19,8 @@ pub fn parse_world(s: &str) -> Result<World> {
     Ok(world)
 }
 
-pub fn guest_rust_code_gen(fpath: &str) -> Result<(String, String)> {
+/// Generate rust guest code
+pub fn gen_rust_guest_code(fpath: &str) -> Result<(String, String)> {
     // get path base name and set extension to rs
     let file_name = Path::new(fpath).file_name().unwrap().to_str().unwrap();
     let mut rs_path = PathBuf::from(file_name);
@@ -48,4 +49,8 @@ pub fn guest_rust_code_gen(fpath: &str) -> Result<(String, String)> {
     Err(anyhow::anyhow!("{} not found in generator", rs_path))
 }
 
-pub mod compile;
+mod compile;
+
+pub use compile::compile_js;
+pub use compile::compile_rust;
+pub use compile::encode_wasm_component;

@@ -69,7 +69,7 @@ impl Init {
         // copy cargo.toml
         let cargotoml_path = Path::new(template).join("Cargo.toml.tpl");
         debug!("[New] use cargo.toml path: {:?}", cargotoml_path);
-        
+
         if let Some(c) = TemplatesAsset::get(cargotoml_path.to_str().unwrap()) {
             let mut cargotoml_content = std::str::from_utf8(&c.data).unwrap().to_string();
             cargotoml_content = cargotoml_content.replace("{{name}}", name);
@@ -103,15 +103,15 @@ impl Init {
 
 #[derive(Args, Debug)]
 pub struct Build {
-    /// Set output filename
-    #[clap(long)]
-    pub output: Option<String>,
     /// Set optimization progress
     #[clap(long, default_value("false"))]
     pub optimize: bool,
     /// Set compiling debug mode
     #[clap(long, default_value("false"))]
     pub debug: bool,
+    /// Set js engine wasm file
+    #[clap(long)]
+    pub js_engine: Option<String>,
 }
 
 impl Build {
@@ -134,7 +134,7 @@ impl Build {
 
     fn build(&self, manifest: &Manifest) -> anyhow::Result<()> {
         if manifest.language == PROJECT_LANGUAGE_RUST {
-            return leaf_codegen::compile::compile_rust(
+            return leaf_compiler::compile_rust(
                 manifest.compile_arch().unwrap(),
                 manifest.compiling_target().unwrap(),
                 self.optimize,
@@ -142,9 +142,10 @@ impl Build {
             );
         }
         if manifest.language == PROJECT_LANGUAGE_JS {
-            return leaf_codegen::compile::compile_js(
+            return leaf_compiler::compile_js(
                 manifest.compiling_target().unwrap(),
                 "src/index.js".to_string(),
+                self.js_engine.clone(),
             );
         }
         anyhow::bail!("Unsupported language: {}", manifest.language)
@@ -238,6 +239,6 @@ impl Component {
             .output
             .clone()
             .unwrap_or_else(|| "component.wasm".to_string());
-        leaf_codegen::compile::convert_rust_component(&self.input, Some(output));
+        leaf_compiler::encode_wasm_component(&self.input, Some(output));
     }
 }

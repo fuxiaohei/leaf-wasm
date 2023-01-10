@@ -1,4 +1,4 @@
-use anyhow::Result;
+use anyhow::{bail, Result};
 use log::{debug, info};
 use std::io::Write;
 use std::path::PathBuf;
@@ -33,7 +33,7 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
     if optimize {
         try_wasm_optimize(&target);
     }
-    convert_rust_component(&target, None);
+    encode_wasm_component(&target, None);
     Ok(())
 }
 
@@ -64,7 +64,7 @@ fn try_wasm_optimize(path: &str) {
     }
 }
 
-pub fn convert_rust_component(path: &str, output: Option<String>) {
+pub fn encode_wasm_component(path: &str, output: Option<String>) {
     let file_bytes = std::fs::read(path).expect("Read wasm file error");
     let wasi_adapter = include_bytes!("../engine/wasi_snapshot_preview1.wasm");
 
@@ -82,7 +82,11 @@ pub fn convert_rust_component(path: &str, output: Option<String>) {
     info!("Convert wasm module to component success, {}", &output)
 }
 
-pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
+pub fn compile_js(
+    target: String,
+    src_js_path: String,
+    js_engine_path: Option<String>,
+) -> Result<()> {
     // js need wizer command
     let cmd = match which("wizer") {
             Ok(cmd) => cmd,
@@ -93,7 +97,16 @@ pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
             }
         };
 
-    let engine_wasm = include_bytes!("../engine/quickjs.wasm");
+    // js engine can be custom
+    let engine_wasm = if let Some(js_engine) = js_engine_path {
+        if PathBuf::from(&js_engine).exists() {
+            bail!("File not found: {}", &js_engine);
+        }
+        std::fs::read(&js_engine).unwrap()
+    } else {
+        let engine_bytes = include_bytes!("../engine/quickjs.wasm");
+        engine_bytes.to_vec()
+    };
     debug!("Use engine_wasm len: {}", engine_wasm.len());
     debug!("Initialize target wasm file: {}", &target);
     std::fs::write(&target, engine_wasm)?;
@@ -135,7 +148,7 @@ pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
         panic!("Wizer failed: {:?}", output);
     }
 
-    convert_rust_component(&wizer_target, None);
+    encode_wasm_component(&wizer_target, None);
 
     Ok(())
 }

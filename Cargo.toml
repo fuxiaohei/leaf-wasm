@@ -4,6 +4,11 @@ version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
 
+[workspace.package]
+version = "0.1.16"
+authors = ["fuxiaohei<fudong0797@gmail.com>"]
+edition = "2021"
+
 [dependencies]
 anyhow = { workspace = true }
 async-trait = { workspace = true }
@@ -14,7 +19,7 @@ hyper = { version = "0.14.23", features = ["full"] }
 hyper-rustls = { version = "0.23.2", features = ["http2"] }
 hyper-timeout = "0.4.1"
 lazy_static = "1.4.0"
-leaf-codegen = { path = "./crates/leaf-codegen" }
+leaf-compiler = { path = "./crates/leaf-compiler" }
 log = { version = "0.4.17", features = ["max_level_debug", "release_max_level_info"] }
 once_cell = "1.17.0"
 rust-embed = "6.4.2"
@@ -31,7 +36,7 @@ wasi-host-cap-std-sync = { git = "https://github.com/bytecodealliance/preview2-p
 wasmtime = { workspace = true }
 
 [build-dependencies]
-leaf-codegen = { path = "./crates/leaf-codegen" }
+leaf-compiler = { path = "./crates/leaf-compiler" }
 vergen = "7.4.4"
 
 [[bin]]
@@ -44,15 +49,10 @@ path = "src/runner.rs"
 
 [workspace]
 members =[
-    "crates/leaf-codegen",
+    "crates/leaf-compiler",
     "crates/leaf-sdk",
     "crates/leaf-sdk-macro",
 ]
-
-[workspace.package]
-version = "0.1.15"
-authors = ["fuxiaohei<fudong0797@gmail.com>"]
-edition = "2021"
 
 [workspace.dependencies]
 anyhow = "1.0.68"
