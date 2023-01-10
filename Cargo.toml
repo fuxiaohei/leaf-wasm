@@ -10,6 +10,12 @@ authors = ["fuxiaohei<fudong0797@gmail.com>"]
 edition = "2021"
 
 [dependencies]
+clap = { version = "4.0.32", features = ["derive"] }
+lazy_static = "1.4.0"
+time = "0.3.17"
+tokio = { version = "1.24.1", features = ["full"] }
+tracing = { version = "0.1.37", features = ["max_level_trace", "release_max_level_info"] }
+tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
 
 [build-dependencies]
 vergen = "7.4.4"
