@@ -1,5 +1,5 @@
 wasmtime::component::bindgen!({
-    path: "./wit/leaf-http-fetch.wit",
+    path: "./wit/http-fetch.wit",
     async: true,
 });
 

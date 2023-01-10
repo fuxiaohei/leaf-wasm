@@ -1,6 +1,6 @@
 use super::Context;
 use crate::common::errors::Error;
-use crate::wit::{fetch, LeafHttp, Request as LeafRequest, Response as LeafResponse};
+use crate::wit::{fetch, HttpHandler, Request as LeafRequest, Response as LeafResponse};
 use log::info;
 use tokio::time::Instant;
 use wasmtime::{
@@ -20,7 +20,7 @@ pub struct Worker {
     /// If wasi disable, use instance to cache worker
     instance: Option<Instance>,
     store: Option<Store<Context>>,
-    exports: Option<LeafHttp>,
+    exports: Option<HttpHandler>,
 
     /// Whether the worker is trapped.If the worker is trapped, it needs re-create.
     is_trapped: bool,
@@ -81,7 +81,7 @@ impl Worker {
             wasi_host::add_to_linker(&mut linker, Context::wasi)
                 .map_err(Error::InstantiateWasmComponent)?;
         }
-        let (exports, instance) = LeafHttp::instantiate_async(&mut store, &self.component, &linker)
+        let (exports, instance) = HttpHandler::instantiate_async(&mut store, &self.component, &linker)
             .await
             .map_err(Error::InstantiateWasmComponent)?;
         self.instance = Some(instance);
@@ -125,7 +125,7 @@ impl Worker {
         req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
         let mut store = self.store.as_mut().unwrap();
-        store.data_mut().fetch().req_id = req.id;
+        store.data_mut().fetch().req_id = req.request_id;
         let exports = self.exports.as_ref().unwrap();
         let res = exports
             .handle_request(&mut store, req)
@@ -138,7 +138,7 @@ impl Worker {
         &mut self,
         req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
-        let context = Context::new(req.id);
+        let context = Context::new(req.request_id);
         let mut store = Store::new(&self.engine, context);
         let instance = self
             .instance_pre
@@ -148,7 +148,7 @@ impl Worker {
             .await
             .map_err(Error::InstantiateWasmComponent)?;
         let exports =
-            LeafHttp::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
+            HttpHandler::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
         let res = exports
             .handle_request(&mut store, req)
             .await
@@ -183,7 +183,7 @@ async fn run_wasm_worker_test() {
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
         let req = Request {
-            id: 1,
+            request_id: 1,
             method: "GET",
             uri: "/abc",
             headers: &headers,
@@ -219,7 +219,7 @@ async fn run_wasi_worker_test() {
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
         let req = Request {
-            id: 1,
+            request_id: 1,
             method: "GET",
             uri: "/abc",
             headers: &headers,

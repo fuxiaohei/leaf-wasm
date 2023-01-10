@@ -3,7 +3,7 @@ use http::Response as httpResponse;
 
 use super::http::{Error, Request, Response};
 
-include!("../../../wit/leaf-http-fetch.rs");
+include!("../../../wit/http-fetch.rs");
 
 pub struct FetchOptions {
     pub timeout: u32,

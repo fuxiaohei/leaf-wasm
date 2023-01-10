@@ -69,7 +69,7 @@ impl Service<Request<Body>> for ServiceContext {
             let body_bytes = hyper::body::to_bytes(req.body_mut()).await?.to_vec();
 
             let leaf_req = LeafRequest {
-                id: req_id,
+                request_id: req_id,
                 method: method.as_str(),
                 uri: url.as_str(),
                 headers: &headers,

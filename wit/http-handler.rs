@@ -1,8 +1,9 @@
 #[allow(clippy::all)]
-pub mod leaf_http {
+pub mod http_handler {
     #[allow(unused_imports)]
     use wit_bindgen_guest_rust::rt::{alloc, string::String, vec::Vec};
 
+    pub type RequestId = u64;
     pub type Status = u16;
     pub type Headers = Vec<(String, String)>;
     pub type Uri = String;
@@ -10,7 +11,7 @@ pub mod leaf_http {
     pub type Method = String;
     #[derive(Clone)]
     pub struct Request {
-        pub id: u64,
+        pub request_id: RequestId,
         pub method: Method,
         pub uri: Uri,
         pub headers: Headers,
@@ -19,7 +20,7 @@ pub mod leaf_http {
     impl core::fmt::Debug for Request {
         fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
             f.debug_struct("Request")
-                .field("id", &self.id)
+                .field("request-id", &self.request_id)
                 .field("method", &self.method)
                 .field("uri", &self.uri)
                 .field("headers", &self.headers)
@@ -42,12 +43,12 @@ pub mod leaf_http {
                 .finish()
         }
     }
-    pub trait LeafHttp {
+    pub trait HttpHandler {
         fn handle_request(req: Request) -> Response;
     }
 
     #[doc(hidden)]
-    pub unsafe fn call_handle_request<T: LeafHttp>(
+    pub unsafe fn call_handle_request<T: HttpHandler>(
         arg0: i64,
         arg1: i32,
         arg2: i32,
@@ -88,7 +89,7 @@ pub mod leaf_http {
         }
         wit_bindgen_guest_rust::rt::dealloc(base4, (len4 as usize) * 16, 4);
         let result6 = T::handle_request(Request {
-            id: arg0 as u64,
+            request_id: arg0 as u64,
             method: String::from_utf8(Vec::from_raw_parts(arg1 as *mut _, len0, len0)).unwrap(),
             uri: String::from_utf8(Vec::from_raw_parts(arg3 as *mut _, len1, len1)).unwrap(),
             headers: result4,
@@ -159,7 +160,7 @@ pub mod leaf_http {
     }
 
     #[doc(hidden)]
-    pub unsafe fn post_return_handle_request<T: LeafHttp>(arg0: i32) {
+    pub unsafe fn post_return_handle_request<T: HttpHandler>(arg0: i32) {
         let base0 = *((arg0 + 4) as *const i32);
         let len0 = *((arg0 + 8) as *const i32);
         for i in 0..len0 {
@@ -189,28 +190,28 @@ pub mod leaf_http {
     }
 
     #[repr(align(4))]
-    struct LeafHttpRetArea([u8; 24]);
-    static mut RET_AREA: LeafHttpRetArea = LeafHttpRetArea([0; 24]);
+    struct HttpHandlerRetArea([u8; 24]);
+    static mut RET_AREA: HttpHandlerRetArea = HttpHandlerRetArea([0; 24]);
 }
 
 /// Declares the export of the component's world for the
 /// given type.
 #[macro_export]
-macro_rules! export_leaf_http(($t:ident) => {
+macro_rules! export_http_handler(($t:ident) => {
     const _: () = {
 
       #[doc(hidden)]
       #[export_name = "handle-request"]
       #[allow(non_snake_case)]
       unsafe extern "C" fn __export_exports_handle_request(arg0: i64,arg1: i32,arg2: i32,arg3: i32,arg4: i32,arg5: i32,arg6: i32,arg7: i32,arg8: i32,arg9: i32,) -> i32 {
-        leaf_http::call_handle_request::<$t>(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,)
+        http_handler::call_handle_request::<$t>(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,)
       }
 
       #[doc(hidden)]
       #[export_name = "cabi_post_handle-request"]
       #[allow(non_snake_case)]
       unsafe extern "C" fn __post_return_exports_handle_request(arg0: i32,) {
-        leaf_http::post_return_handle_request::<$t>(arg0,)
+        http_handler::post_return_handle_request::<$t>(arg0,)
       }
 
     };
@@ -227,17 +228,18 @@ macro_rules! export_leaf_http(($t:ident) => {
   });
 
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:leaf-http"]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 194] = [
-    1, 0, 9, 108, 101, 97, 102, 45, 104, 116, 116, 112, 0, 97, 115, 109, 10, 0, 1, 0, 7, 82, 10,
-    115, 115, 111, 2, 115, 115, 112, 2, 112, 125, 107, 4, 114, 5, 2, 105, 100, 119, 6, 109, 101,
-    116, 104, 111, 100, 0, 3, 117, 114, 105, 1, 7, 104, 101, 97, 100, 101, 114, 115, 3, 4, 98, 111,
-    100, 121, 5, 123, 114, 3, 6, 115, 116, 97, 116, 117, 115, 7, 7, 104, 101, 97, 100, 101, 114,
-    115, 3, 4, 98, 111, 100, 121, 5, 64, 1, 3, 114, 101, 113, 6, 0, 8, 11, 88, 8, 6, 115, 116, 97,
-    116, 117, 115, 0, 3, 7, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 3, 3, 117, 114, 105, 0, 3,
-    1, 4, 98, 111, 100, 121, 0, 3, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3, 0, 7, 114, 101, 113,
-    117, 101, 115, 116, 0, 3, 6, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0, 3, 8, 14, 104, 97,
-    110, 100, 108, 101, 45, 114, 101, 113, 117, 101, 115, 116, 0, 3, 9,
+#[link_section = "component-type:http-handler"]
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 220] = [
+    1, 0, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 0, 97, 115, 109, 10, 0, 1,
+    0, 7, 91, 11, 119, 115, 115, 111, 2, 115, 115, 112, 3, 112, 125, 107, 5, 114, 5, 10, 114, 101,
+    113, 117, 101, 115, 116, 45, 105, 100, 0, 6, 109, 101, 116, 104, 111, 100, 1, 3, 117, 114, 105,
+    2, 7, 104, 101, 97, 100, 101, 114, 115, 4, 4, 98, 111, 100, 121, 6, 123, 114, 3, 6, 115, 116,
+    97, 116, 117, 115, 8, 7, 104, 101, 97, 100, 101, 114, 115, 4, 4, 98, 111, 100, 121, 6, 64, 1,
+    3, 114, 101, 113, 7, 0, 9, 11, 102, 9, 10, 114, 101, 113, 117, 101, 115, 116, 45, 105, 100, 0,
+    3, 0, 6, 115, 116, 97, 116, 117, 115, 0, 3, 8, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 4, 3,
+    117, 114, 105, 0, 3, 2, 4, 98, 111, 100, 121, 0, 3, 5, 6, 109, 101, 116, 104, 111, 100, 0, 3,
+    1, 7, 114, 101, 113, 117, 101, 115, 116, 0, 3, 7, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0,
+    3, 9, 14, 104, 97, 110, 100, 108, 101, 45, 114, 101, 113, 117, 101, 115, 116, 0, 3, 10,
 ];
 
 #[inline(never)]

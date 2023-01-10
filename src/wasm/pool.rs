@@ -53,7 +53,7 @@ async fn run_worker_pool_test() {
 
         let headers: Vec<(&str, &str)> = vec![];
         let req = Request {
-            id: 1,
+            request_id: 1,
             method: "GET",
             uri: "/abc",
             headers: &headers,

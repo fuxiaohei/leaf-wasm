@@ -1,4 +1,6 @@
 interface exports {
+    // request id
+    type request-id = u64
     // status code
     type status = u16
     // headers as key value pairs
@@ -11,7 +13,7 @@ interface exports {
     type method = string
     // request object
     record request{
-        id: u64,
+        request-id: request-id,
         method: method,
         uri: uri,
         headers: headers,
@@ -28,6 +30,6 @@ interface exports {
 }
 
 // world imports and exports
-world leaf-http {
+world http-handler {
   default export exports
 }

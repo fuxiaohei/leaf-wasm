@@ -50,6 +50,6 @@ interface http-imports {
 
 
 // world imports and exports
-world leaf-http-fetch {
+world http-fetch {
     import http-fetch: http-imports
 }

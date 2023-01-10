@@ -15,8 +15,8 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
     let child = cmd
         .arg("--target")
         .arg(arch)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()
         .expect("failed to execute cargo child process");
     let output = child
@@ -50,8 +50,8 @@ fn try_wasm_optimize(path: &str) {
         .arg("-o")
         .arg(path)
         .arg(path)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()
         .expect("failed to execute wasm-opt child process");
     let output = child
@@ -108,8 +108,8 @@ pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
         .arg("--inherit-stdio=true")
         .arg("--inherit-env=true")
         .stdin(Stdio::piped())
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stdout(Stdio::inherit())
+        .stderr(Stdio::inherit())
         .spawn()
         .expect("failed to execute wizer child process");
     let mut stdin = child.stdin.take().expect("failed to get stdin");
