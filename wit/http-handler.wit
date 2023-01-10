@@ -1,0 +1,49 @@
+// http handler implementation inspired by https://github.com/fermyon/spin/blob/main/wit/ephemeral/http-types.wit
+
+interface exports {
+    // The HTTP request id
+    type request-id = u64
+
+    // The HTTP status code.
+    type http-status = u16
+
+    // The HTTP body.
+    // Currently stream or futures are not supported.
+    // So the body is a list of synchronous bytes.
+    type body = list<u8>
+
+    // The HTTP headers represented as a list of (name, value) pairs.
+    type headers = list<tuple<string, string>>
+
+    // The HTTP URI of the current request.
+    type uri = string
+
+    // The HTTP method of the current request.
+    // use uppercase for the method name.
+    type method = string
+
+    // An HTTP request.
+    record request {
+        request-id:request-id,
+        method: method,
+        uri: uri,
+        headers: headers,
+        body: option<body>,
+    }
+
+    // An HTTP response.
+    record response {
+        status: http-status,
+        headers: headers,
+        body: option<body>,
+    }
+
+    // handle request function
+    handle-request: func(req: request) -> response
+
+}
+
+// world imports and exports
+world http-handler {
+  default export exports
+}

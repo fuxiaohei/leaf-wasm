@@ -1,0 +1,11 @@
+[package]
+name = "compiler"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+wit-parser = "0.3.1"
+wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+anyhow = "1.0.68"

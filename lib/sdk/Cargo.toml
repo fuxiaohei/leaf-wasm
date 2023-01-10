@@ -1,0 +1,14 @@
+[package]
+name = "leaf-sdk"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[lib]
+name = "leaf_sdk"
+
+[dependencies]
+anyhow = "1.0.68"
+bytes = "1.3.0"
+http = "0.2.8"
+sdk-macro = { path="../sdk-macro"}
