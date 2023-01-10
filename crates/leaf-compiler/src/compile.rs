@@ -99,7 +99,7 @@ pub fn compile_js(
 
     // js engine can be custom
     let engine_wasm = if let Some(js_engine) = js_engine_path {
-        if PathBuf::from(&js_engine).exists() {
+        if !PathBuf::from(&js_engine).exists() {
             bail!("File not found: {}", &js_engine);
         }
         std::fs::read(&js_engine).unwrap()
