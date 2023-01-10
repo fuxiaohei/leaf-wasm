@@ -12,15 +12,18 @@ pub struct Worker {
     path: String,
     engine: Engine,
     component: Component,
+    enable_wasi: bool,
 
+    /// If wasi enable, use instance_pre to cache worker
+    instance_pre: Option<InstancePre<Context>>,
+
+    /// If wasi disable, use instance to cache worker
     instance: Option<Instance>,
     store: Option<Store<Context>>,
     exports: Option<LeafHttp>,
-    instance_pre: Option<InstancePre<Context>>,
 
     /// Whether the worker is trapped.If the worker is trapped, it needs re-create.
     is_trapped: bool,
-    enable_wasi: bool,
 }
 
 impl std::fmt::Debug for Worker {
