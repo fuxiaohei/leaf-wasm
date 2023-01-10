@@ -40,5 +40,6 @@ pub struct Serve {
 impl Serve {
     pub async fn run(&self) {
         debug!("[Command] serve: {:?}", self);
+        super::server::start(self.addr.unwrap()).await;
     }
 }

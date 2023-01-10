@@ -2,6 +2,7 @@ use clap::Parser;
 
 mod base;
 mod cmd;
+mod server;
 
 /// Leaf Command line
 #[derive(Parser)]
