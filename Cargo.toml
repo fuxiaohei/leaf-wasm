@@ -1,0 +1,15 @@
+[package]
+name = "leaf-wasm"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[workspace.package]
+version = "0.2.0"
+authors = ["fuxiaohei<fudong0797@gmail.com>"]
+edition = "2021"
+
+[dependencies]
+
+[build-dependencies]
+vergen = "7.4.4"
