@@ -20,6 +20,8 @@ enum LeafCli {
     Build(cmd::cli::Build),
     /// Serve runs the leaf project
     Serve(cmd::cli::Serve),
+    /// Component convert wasm module to component
+    Component(cmd::cli::Component),
 }
 
 #[tokio::main]
@@ -31,5 +33,6 @@ async fn main() {
         LeafCli::Init(cmd) => cmd.run().await,
         LeafCli::Build(cmd) => cmd.run().await,
         LeafCli::Serve(cmd) => cmd.run().await,
+        LeafCli::Component(cmd) => cmd.run().await,
     }
 }

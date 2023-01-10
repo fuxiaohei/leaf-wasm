@@ -33,7 +33,7 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
     if optimize {
         try_wasm_optimize(&target);
     }
-    convert_rust_component(&target);
+    convert_rust_component(&target, None);
     Ok(())
 }
 
@@ -64,7 +64,7 @@ fn try_wasm_optimize(path: &str) {
     }
 }
 
-fn convert_rust_component(path: &str) {
+pub fn convert_rust_component(path: &str, output: Option<String>) {
     let file_bytes = std::fs::read(path).expect("Read wasm file error");
     let wasi_adapter = include_bytes!("../engine/wasi_snapshot_preview1.wasm");
 
@@ -77,8 +77,9 @@ fn convert_rust_component(path: &str) {
         .encode()
         .expect("Encode component");
 
-    std::fs::write(path, component).expect("Write component file error");
-    info!("Convert wasm module to component success, {}", path)
+    let output = output.unwrap_or_else(|| path.to_string());
+    std::fs::write(&output, component).expect("Write component file error");
+    info!("Convert wasm module to component success, {}", &output)
 }
 
 pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
@@ -133,8 +134,8 @@ pub fn compile_js(target: String, src_js_path: String) -> Result<()> {
     } else {
         panic!("Wizer failed: {:?}", output);
     }
-    
-    convert_rust_component(&wizer_target);
+
+    convert_rust_component(&wizer_target, None);
 
     Ok(())
 }

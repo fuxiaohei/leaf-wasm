@@ -69,12 +69,13 @@ impl Init {
         // copy cargo.toml
         let cargotoml_path = Path::new(template).join("Cargo.toml.tpl");
         debug!("[New] use cargo.toml path: {:?}", cargotoml_path);
-        TemplatesAsset::get(cargotoml_path.to_str().unwrap()).map(|c| {
+        
+        if let Some(c) = TemplatesAsset::get(cargotoml_path.to_str().unwrap()) {
             let mut cargotoml_content = std::str::from_utf8(&c.data).unwrap().to_string();
             cargotoml_content = cargotoml_content.replace("{{name}}", name);
             let cargotoml = Path::new(name).join("Cargo.toml");
             std::fs::write(cargotoml, cargotoml_content).unwrap();
-        });
+        };
 
         // create src dir
         let librs_target = Path::new(name).join("src");
@@ -215,5 +216,28 @@ impl Serve {
 
         // start local server
         server::start(self.addr.unwrap(), wasm_file, enable_wasi).await;
+    }
+}
+
+#[derive(Args, Debug)]
+pub struct Component {
+    /// Input file
+    pub input: String,
+    /// Set output filename
+    #[clap(long)]
+    pub output: Option<String>,
+}
+
+impl Component {
+    pub async fn run(&self) {
+        if !std::path::PathBuf::from(&self.input).exists() {
+            error!("File not found: {}", &self.input);
+            return;
+        }
+        let output = self
+            .output
+            .clone()
+            .unwrap_or_else(|| "component.wasm".to_string());
+        leaf_codegen::compile::convert_rust_component(&self.input, Some(output));
     }
 }
