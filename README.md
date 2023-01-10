@@ -6,23 +6,23 @@ goal to be a simple, fast, and safe web assembly serverless platform, like laf.
 
 leaf-cli is a command line tool for leaf-wasm to create, build, and deploy wasm projects.
 
-- create a new project
+- initialize a new project
 
 ```bash
-leaf-cli new my-project
+leaf-cli init my-project
 ```
 
-- compile project to wasm
+- build project to wasm
 
 ```bash
 cd my-project
-leaf-cli compile
+leaf-cli build
 ```
 
-- run wasm in local
+- run wasm in local server
 
 ```bash
-leaf-cli up
+leaf-cli serve
 ```
 
 ## Build from source

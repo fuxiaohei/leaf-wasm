@@ -1,5 +1,5 @@
 mod base;
-mod cmd_cli;
+mod cmd;
 mod common;
 mod server;
 mod wasm;
@@ -14,12 +14,12 @@ use clap::Parser;
     version = base::get_version(),
 )]
 enum LeafCli {
-    /// New creates a new leaf project
-    New(cmd_cli::NewCommand),
-    /// Compile compiles the leaf project
-    Compile(cmd_cli::CompileCommand),
-    /// Up runs the leaf project
-    Up(cmd_cli::UpCommand),
+    /// Init creates a new leaf project
+    Init(cmd::cli::Init),
+    /// Build compiles the leaf project
+    Build(cmd::cli::Build),
+    /// Serve runs the leaf project
+    Serve(cmd::cli::Serve),
 }
 
 #[tokio::main]
@@ -28,8 +28,8 @@ async fn main() {
 
     let args = LeafCli::parse();
     match args {
-        LeafCli::New(cmd) => cmd.run().await,
-        LeafCli::Compile(cmd) => cmd.run().await,
-        LeafCli::Up(cmd) => cmd.run().await,
+        LeafCli::Init(cmd) => cmd.run().await,
+        LeafCli::Build(cmd) => cmd.run().await,
+        LeafCli::Serve(cmd) => cmd.run().await,
     }
 }
