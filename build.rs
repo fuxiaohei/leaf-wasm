@@ -27,5 +27,7 @@ fn build_wit_guest_code() {
         let (target_rs, target_rs_content) =
             leaf_compiler::gen_rust_guest_code(wit_file_path.to_str().unwrap()).unwrap();
         std::fs::write(target_rs, target_rs_content).unwrap();
+
+        // leaf_compiler::gen_js_host_code(wit_file_path.to_str().unwrap()).unwrap();
     }
 }

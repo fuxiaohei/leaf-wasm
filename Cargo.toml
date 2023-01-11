@@ -3,6 +3,7 @@ name = "leaf-wasm"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
+default-run = "leaf-cli"
 
 [workspace.package]
 version = "0.1.16"
@@ -62,6 +63,7 @@ wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = ["
 wit-component = "0.3.2"
 wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+wit-bindgen-gen-host-js = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-parser = "0.3.1"
 bytes = "1.3.0"
