@@ -1,9 +1,16 @@
 mod fetch;
 
 pub mod http {
-    pub type Request = http::Request<Option<bytes::Bytes>>;
-    pub type Response = http::Response<Option<bytes::Bytes>>;
-    pub use super::fetch::fetch;
-    pub use super::fetch::FetchOptions;
-    pub type Error = super::fetch::HttpError;
+    use super::fetch;
+    use bytes::Bytes;
+
+    pub type Request = http::Request<Option<Bytes>>;
+    pub type Response = http::Response<Option<Bytes>>;
+    pub use fetch::fetch;
+    pub use fetch::FetchOptions;
+    pub type Error = fetch::HttpError;
 }
+
+// Re-export leaf_sdk_macro, 
+// make all functions in leaf_sdk
+pub use leaf_sdk_macro::http_main;

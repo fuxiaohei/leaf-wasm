@@ -5,7 +5,8 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-anyhow =  { workspace =true }
-bytes =  { workspace =true }
-http =  { workspace =true }
-wit-bindgen-guest-rust = { workspace =true }
+anyhow = { workspace = true }
+bytes = { workspace = true }
+http = { workspace = true }
+wit-bindgen-guest-rust = { workspace = true }
+leaf-sdk-macro = { path = "../leaf-sdk-macro" }

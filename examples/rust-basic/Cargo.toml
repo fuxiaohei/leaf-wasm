@@ -1,0 +1,14 @@
+[package]
+name = "rust-basic"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bytes = "1.3.0"
+http = "0.2.8"
+anyhow = "1.0.68"
+leaf-sdk = { path = "../../crates/leaf-sdk" }
+wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
+
+[lib]
+crate-type = ["cdylib"]
