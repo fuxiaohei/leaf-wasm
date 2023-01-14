@@ -1,9 +1,9 @@
-use crate::common::embed::TemplatesAsset;
+use crate::common::embed::TemplateAssets;
 use crate::common::manifest::Manifest;
 use crate::common::vars::*;
 use crate::server;
 use clap::Args;
-use log::{debug, error, info};
+use log::{debug, error, info, warn};
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 
@@ -12,7 +12,7 @@ pub struct Init {
     /// The name of the project
     pub name: String,
     /// The template to use
-    #[clap(long, default_value("hello-rust"))]
+    #[clap(long, default_value("rust-basic"))]
     pub template: Option<String>,
 }
 
@@ -20,10 +20,10 @@ impl Init {
     fn determine_language(&self) -> String {
         if self.template.is_some() {
             let template = self.template.as_ref().unwrap();
-            if template.contains("rust") {
+            if template.starts_with("rust-") {
                 return String::from("rust");
             }
-            if template.contains("js") {
+            if template.starts_with("js-") {
                 return String::from("js");
             }
         }
@@ -45,12 +45,16 @@ impl Init {
         let manifest = Manifest {
             name: self.name.clone(),
             language: self.determine_language(),
+            description: String::from(
+                "leaf wasm project with template ".to_owned()
+                    + self.template.as_ref().unwrap().as_str(),
+            ),
             ..Default::default()
         };
         let manifest_file = dpath.join(DEFAULT_MANIFEST_FILE);
         if Path::new(manifest_file.to_str().unwrap()).exists() {
-            error!(
-                "manifest file already exist: {}",
+            warn!(
+                "Manifest file already exist: {}",
                 manifest_file.to_str().unwrap()
             );
             //return;
@@ -58,46 +62,48 @@ impl Init {
         manifest.to_file(manifest_file.to_str().unwrap()).unwrap();
         info!("Created manifest: {}", manifest_file.to_str().unwrap());
 
-        // create sample project
-        if self.create_project(&self.name, self.template.as_ref().unwrap().as_str()) {
-            info!("Created project: {}", &self.name);
-        } else {
-            error!("Create project failed");
+        match self.create_example(&self.name, self.template.as_ref().unwrap().as_str()) {
+            Ok(_) => info!("Created project: {}", &self.name),
+            Err(e) => error!("Create project failed: {}", e),
         }
     }
-    fn create_project(&self, name: &str, template: &str) -> bool {
-        // copy cargo.toml
-        let cargotoml_path = Path::new(template).join("Cargo.toml.tpl");
-        debug!("[New] use cargo.toml path: {:?}", cargotoml_path);
 
-        if let Some(c) = TemplatesAsset::get(cargotoml_path.to_str().unwrap()) {
-            let mut cargotoml_content = std::str::from_utf8(&c.data).unwrap().to_string();
-            cargotoml_content = cargotoml_content.replace("{{name}}", name);
-            let cargotoml = Path::new(name).join("Cargo.toml");
-            std::fs::write(cargotoml, cargotoml_content).unwrap();
+    fn create_example(&self, name: &str, template: &str) -> anyhow::Result<()> {
+        // if template is rust, copy cargo.toml
+        let toml = Path::new(template).join("Cargo.toml");
+        debug!("[New] use cargo.toml path: {:?}", toml);
+        if let Some(c) = TemplateAssets::get(toml.to_str().unwrap()) {
+            let mut content = std::str::from_utf8(&c.data)?.to_string();
+            content = content.replace(template, name);
+            content = content.replace(
+                "path = \"../../crates/leaf-sdk\"",
+                "git = \"https://github.com/fuxiaohei/leaf-wasm\"",
+            );
+            let target = Path::new(name).join("Cargo.toml");
+            std::fs::write(target, content)?;
         };
 
         // create src dir
-        let librs_target = Path::new(name).join("src");
-        std::fs::create_dir_all(librs_target.parent().unwrap()).unwrap();
+        let src_dir = Path::new(name).join("src");
+        std::fs::create_dir_all(src_dir.parent().unwrap()).unwrap();
 
         // copy src files
-        let librs_path = Path::new(template).join("src");
-        TemplatesAsset::iter().for_each(|t| {
-            if t.starts_with(librs_path.to_str().unwrap()) {
+        let tpl_dir = Path::new(template).join("src");
+        TemplateAssets::iter().for_each(|t| {
+            if t.starts_with(tpl_dir.to_str().unwrap()) {
                 let src_path = Path::new(t.as_ref())
-                    .strip_prefix(librs_path.to_str().unwrap())
+                    .strip_prefix(tpl_dir.to_str().unwrap())
                     .unwrap();
-                let file = TemplatesAsset::get(t.as_ref()).unwrap();
+                let file = TemplateAssets::get(t.as_ref()).unwrap();
                 let content = std::str::from_utf8(&file.data).unwrap().to_string();
-                let target_path = librs_target.join(src_path);
+                let target_path = src_dir.join(src_path);
                 debug!("[New] src_path: {:?}, {:?}", src_path, target_path);
                 std::fs::create_dir_all(target_path.parent().unwrap()).unwrap();
                 std::fs::write(target_path, content).unwrap();
             }
         });
 
-        true
+        Ok(())
     }
 }
 
