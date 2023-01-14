@@ -61,8 +61,6 @@ members = [
     "crates/leaf-sdk-macro",
     "examples/rust-basic",
     "examples/rust-fetch",
-    "examples/js-basic",
-    "examples/js-fetch"
 ]
 
 [workspace.dependencies]

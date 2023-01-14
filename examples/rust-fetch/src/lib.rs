@@ -1,14 +1,21 @@
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+use leaf_sdk::{
+    http::{fetch, FetchOptions, Request, Response},
+    http_main,
+};
+use std::str::FromStr;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[http_main]
+pub fn handle_sdk_http(mut _req: Request) -> Response {
+    let fetch_request = http::Request::builder()
+        .method("GET")
+        .uri("https://www.rust-lang.org/")
+        .body(None)
+        .unwrap();
 
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+    let fetch_response = fetch(fetch_request, FetchOptions::default()).unwrap();
+
+    http::Response::builder()
+        .status(fetch_response.status())
+        .body(fetch_response.body().clone())
+        .unwrap()
 }

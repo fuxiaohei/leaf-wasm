@@ -1,0 +1,5 @@
+manifest = "v1"
+name = "rust-fetch"
+description = "example rust project with fetch remote url"
+authors = []
+language = "rust"

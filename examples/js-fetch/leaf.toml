@@ -1,0 +1,5 @@
+manifest = "v1"
+name = "js-fetch"
+description = "example javascript project with fetch remote url"
+authors = []
+language = "js"
