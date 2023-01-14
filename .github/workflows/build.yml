@@ -42,7 +42,7 @@ jobs:
 
   build_rust_basic:
     runs-on: ubuntu-latest
-    needs: build_latest
+    needs: build_all
     steps:
       - name: Update local toolchain
         run: |
@@ -63,7 +63,7 @@ jobs:
 
   build_js_basic:
     runs-on: ubuntu-latest
-    needs: build_latest
+    needs: build_all
     steps:
       - name: Update local toolchain
         run: |
