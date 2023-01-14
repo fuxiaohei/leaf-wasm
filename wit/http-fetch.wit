@@ -37,12 +37,23 @@ interface http-imports {
         // The request failed due to invalid request 
         invalid-request,
     }
+    // Fetch redirect policy
+    enum redirect-policy {
+        // Follow redirects.
+        follow,
+        // Do not follow redirects.
+        error,
+        // Follow redirects, but do not follow redirects to cross-origin destinations.
+        manual,
+    }
     // HTTP fetch request option
     record fetch-options{
         // The request timeout in milliseconds.
         timeout: u32,
         // Decompress the response body.
         decompress: bool,
+        // Follow redirects.
+        redirect: redirect-policy,
     }
     // request remote function
     fetch: func(req: request, options: fetch-options) -> result<response,http-error>

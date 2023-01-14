@@ -41,6 +41,7 @@ pub fn fetch(req: Request, options: FetchOptions) -> Result<Response, Error> {
     let opts = http_fetch::FetchOptions {
         timeout: options.timeout,
         decompress: options.decompress,
+        redirect: http_fetch::RedirectPolicy::Follow,
     };
 
     // call host function to fetch
@@ -60,3 +61,4 @@ pub fn fetch(req: Request, options: FetchOptions) -> Result<Response, Error> {
 }
 
 pub use http_fetch::HttpError;
+pub use http_fetch::RedirectPolicy;
