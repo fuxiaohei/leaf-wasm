@@ -45,10 +45,8 @@ impl Init {
         let manifest = Manifest {
             name: self.name.clone(),
             language: self.determine_language(),
-            description: String::from(
-                "leaf wasm project with template ".to_owned()
-                    + self.template.as_ref().unwrap().as_str(),
-            ),
+            description: "leaf wasm project with template ".to_owned()
+                + self.template.as_ref().unwrap().as_str(),
             ..Default::default()
         };
         let manifest_file = dpath.join(DEFAULT_MANIFEST_FILE);
@@ -64,7 +62,7 @@ impl Init {
 
         match self.create_example(&self.name, self.template.as_ref().unwrap().as_str()) {
             Ok(_) => info!("Created project: {}", &self.name),
-            Err(e) => error!("Create project failed: {}", e),
+            Err(e) => panic!("Create project failed: {}", e),
         }
     }
 
@@ -118,6 +116,9 @@ pub struct Build {
     /// Set js engine wasm file
     #[clap(long)]
     pub js_engine: Option<String>,
+    /// Set compiling target directory
+    #[clap(long)]
+    pub target_dir: Option<String>,
 }
 
 impl Build {
@@ -127,14 +128,13 @@ impl Build {
         let manifest = match Manifest::from_file(manifest_file) {
             Ok(manifest) => manifest,
             Err(e) => {
-                error!("read manifest file error: {}", e);
-                return;
+                panic!("read manifest file error: {}", e);
             }
         };
         info!("Read manifest '{:?}'", manifest_file);
         match self.build(&manifest) {
             Ok(_) => info!("Compile success"),
-            Err(e) => error!("Compile failed: {}", e),
+            Err(e) => panic!("Compile failed: {}", e),
         }
     }
 
@@ -142,14 +142,14 @@ impl Build {
         if manifest.language == PROJECT_LANGUAGE_RUST {
             return leaf_compiler::compile_rust(
                 manifest.compile_arch().unwrap(),
-                manifest.compiling_target().unwrap(),
+                manifest.compiling_target(self.target_dir.clone()).unwrap(),
                 self.optimize,
                 self.debug,
             );
         }
         if manifest.language == PROJECT_LANGUAGE_JS {
             return leaf_compiler::compile_js(
-                manifest.compiling_target().unwrap(),
+                manifest.compiling_target(self.target_dir.clone()).unwrap(),
                 "src/index.js".to_string(),
                 self.js_engine.clone(),
             );
@@ -169,6 +169,9 @@ pub struct Serve {
     /// Enable wasi
     #[clap(long, default_value("false"))]
     pub enable_wasi: bool,
+    /// Set compiling target directory
+    #[clap(long)]
+    pub target_dir: Option<String>,
 }
 
 impl Serve {
@@ -186,8 +189,7 @@ impl Serve {
             let manifest = match Manifest::from_file(manifest_file) {
                 Ok(manifest) => manifest,
                 Err(e) => {
-                    error!("read manifest file error: {}", e);
-                    return;
+                    panic!("read manifest file error: {}", e);
                 }
             };
             info!("[Main] read manifest '{:?}'", manifest_file);
@@ -199,25 +201,22 @@ impl Serve {
                         enable_wasi
                     }
                     Err(e) => {
-                        error!("determine enable_wasi error: {}", e);
-                        return;
+                        panic!("determine enable_wasi error: {}", e);
                     }
                 };
             }
 
-            match manifest.final_target() {
+            match manifest.final_target(self.target_dir.clone()) {
                 Ok(file) => file,
                 Err(e) => {
-                    error!("[Main] find wasm error: {}", e);
-                    return;
+                    panic!("[Main] find wasm error: {}", e);
                 }
             }
         };
 
         if !std::path::PathBuf::from(&wasm_file).exists() {
             error!("[Worker] file not found: {}", &wasm_file);
-            info!("[Worker] Try to run 'leaf-cli compile' to build wasm file");
-            return;
+            panic!("[Worker] Try to run 'leaf-cli compile' to build wasm file");
         }
         info!("[Worker] use file: {}", &wasm_file);
 
@@ -238,8 +237,7 @@ pub struct Component {
 impl Component {
     pub async fn run(&self) {
         if !std::path::PathBuf::from(&self.input).exists() {
-            error!("File not found: {}", &self.input);
-            return;
+            panic!("File not found: {}", &self.input);
         }
         let output = self
             .output

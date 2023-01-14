@@ -41,28 +41,28 @@ impl Manifest {
     }
 
     /// determine compiling target file, before optimized
-    pub fn compiling_target(&self) -> Result<String> {
+    pub fn compiling_target(&self, target_dir: Option<String>) -> Result<String> {
         let name = self.name.replace('-', "_");
-        let dir = env!("CARGO_MANIFEST_DIR");
+        let target_dir = match target_dir {
+            Some(dir) => dir,
+            None => RUST_TARGET_WASM_RELEASE_DIR.to_string(),
+        };
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(format!(
-                "{}/{}/{}.wasm",
-                dir, RUST_TARGET_WASM_RELEASE_DIR, name
-            )),
+            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", target_dir, name)),
             PROJECT_LANGUAGE_JS => Ok(format!("{}.wasm", name)),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
 
     /// determine optimized final target file
-    pub fn final_target(&self) -> Result<String> {
+    pub fn final_target(&self, target_dir: Option<String>) -> Result<String> {
         let name = self.name.replace('-', "_");
-        let dir = env!("CARGO_MANIFEST_DIR");
+        let target_dir = match target_dir {
+            Some(dir) => dir,
+            None => RUST_TARGET_WASM_RELEASE_DIR.to_string(),
+        };
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(format!(
-                "{}/{}/{}.wasm",
-                dir, RUST_TARGET_WASM_RELEASE_DIR, name
-            )),
+            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", target_dir, name)),
             PROJECT_LANGUAGE_JS => Ok(format!("{}_wizer.wasm", name)),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
