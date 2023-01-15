@@ -5,9 +5,9 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-anyhow =  { workspace =true }
-bytes =  { workspace =true }
-http =  { workspace =true }
+anyhow =  { workspace = true }
+bytes =  { workspace = true }
+http =  { workspace = true }
 quote = "1.0.21"
 syn = { version = "1.0.105", features = ["full"] }
 

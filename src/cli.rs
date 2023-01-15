@@ -2,8 +2,6 @@ mod base;
 mod cmd;
 mod common;
 mod server;
-mod wasm;
-mod wit;
 
 use clap::Parser;
 

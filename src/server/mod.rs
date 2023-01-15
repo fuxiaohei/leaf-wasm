@@ -1,6 +1,6 @@
 use hyper::Server;
-use log::{error, info};
 use std::net::SocketAddr;
+use tracing::{error, info};
 
 mod service;
 

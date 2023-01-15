@@ -1,6 +1,7 @@
-use crate::wit::fetch::FetchImpl;
+use leaf_host_impl::http::FetchImpl;
 use wasi_host::WasiCtx;
 use wasi_host_cap_std_sync::WasiCtxBuilder;
+
 pub struct Context {
     pub wasi: WasiCtx,
     pub fetch: FetchImpl,

@@ -1,8 +1,7 @@
-use super::Context;
-use crate::common::errors::Error;
-use crate::wit::{fetch, HttpHandler, Request as LeafRequest, Response as LeafResponse};
-use log::info;
+use super::{Context, Error};
+use leaf_host_impl::http::{HttpHandler, Request as LeafRequest, Response as LeafResponse};
 use tokio::time::Instant;
+use tracing::info;
 use wasmtime::{
     component::{Component, Instance, InstancePre, Linker},
     Config, Engine, Store,
@@ -75,15 +74,16 @@ impl Worker {
         let ctx = Context::new(0);
         let mut store = Store::new(&self.engine, ctx);
         let mut linker: Linker<Context> = Linker::new(&self.engine);
-        fetch::add_to_linker(&mut linker, Context::fetch)
+        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch)
             .map_err(Error::InstantiateWasmComponent)?;
         if self.enable_wasi {
             wasi_host::add_to_linker(&mut linker, Context::wasi)
                 .map_err(Error::InstantiateWasmComponent)?;
         }
-        let (exports, instance) = HttpHandler::instantiate_async(&mut store, &self.component, &linker)
-            .await
-            .map_err(Error::InstantiateWasmComponent)?;
+        let (exports, instance) =
+            HttpHandler::instantiate_async(&mut store, &self.component, &linker)
+                .await
+                .map_err(Error::InstantiateWasmComponent)?;
         self.instance = Some(instance);
         self.store = Some(store);
         self.exports = Some(exports);
@@ -101,7 +101,7 @@ impl Worker {
         let start_time = Instant::now();
         // create linker
         let mut linker: Linker<Context> = Linker::new(&self.engine);
-        fetch::add_to_linker(&mut linker, Context::fetch)
+        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch)
             .map_err(Error::InstantiateWasmComponent)?;
         wasi_host::add_to_linker(&mut linker, Context::wasi)
             .map_err(Error::InstantiateWasmComponent)?;
@@ -174,9 +174,9 @@ fn create_wasmtime_config() -> Config {
 #[tokio::test]
 async fn run_wasm_worker_test() {
     use super::Worker;
-    use crate::wit::Request;
+    use leaf_host_impl::http::Request;
 
-    let sample_wasm_file = "./tests/sample.wasm";
+    let sample_wasm_file =  "../../tests/sample.wasm";
 
     let mut worker = Worker::new(sample_wasm_file, false).await.unwrap();
 
@@ -209,10 +209,10 @@ async fn run_wasm_worker_test() {
 #[tokio::test]
 async fn run_wasi_worker_test() {
     use super::Worker;
-    use crate::wit::Request;
+    use leaf_host_impl::http::Request;
 
     // TODO: use real wasi wasm file
-    let sample_wasm_file = "./tests/sample.wasm";
+    let sample_wasm_file =  "../../tests/sample.wasm";
 
     let mut worker = Worker::new(sample_wasm_file, true).await.unwrap();
 

@@ -3,9 +3,9 @@ use crate::common::manifest::Manifest;
 use crate::common::vars::*;
 use crate::server;
 use clap::Args;
-use log::{debug, error, info, warn};
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
+use tracing::{debug, error, info, warn};
 
 #[derive(Args, Debug)]
 pub struct Init {

@@ -13,33 +13,25 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 async-trait = { workspace = true }
-clap = { version = "4.1.0", features = ["derive"] }
-deadpool = { version = "0.9.5", features = ["rt_tokio_1"] }
+clap = { version = "4.1.1", features = ["derive"] }
 futures = "0.3.25"
 hyper = { version = "0.14.23", features = ["full"] }
 hyper-rustls = { version = "0.23.2", features = ["http2"] }
 lazy_static = "1.4.0"
 leaf-compiler = { path = "./crates/leaf-compiler" }
-log = { version = "0.4.17", features = [
-    "max_level_debug",
-    "release_max_level_info"
-] }
+leaf-host-impl = { path = "./crates/leaf-host-impl" }
+leaf-worker = { path = "./crates/leaf-worker" }
 once_cell = "1.17.0"
-reqwest = { version = "0.11.13", features = ["rustls-tls"] }
+reqwest = { workspace = true }
 rust-embed = "6.4.2"
 serde = "1.0.152"
 serde_derive = "1.0.152"
 thiserror = { workspace = true }
 time = "0.3.17"
-tokio = { version = "1.24.1", features = ["full"] }
+tokio = { workspace = true }
 toml = "0.5.10"
-tracing = { version = "0.1.37", features = [
-    "max_level_debug",
-    "release_max_level_info"
-] }
+tracing = { workspace = true }
 tracing-subscriber = { version = "0.3.16", features = ["time", "local-time"] }
-wasi-host = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "host" }
-wasi-host-cap-std-sync = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "wasi-cap-std-sync" }
 wasmtime = { workspace = true }
 
 [build-dependencies]
@@ -57,8 +49,10 @@ path = "src/runner.rs"
 [workspace]
 members = [
     "crates/leaf-compiler",
+    "crates/leaf-host-impl",
     "crates/leaf-sdk",
     "crates/leaf-sdk-macro",
+    "crates/leaf-worker",
     "examples/rust-basic",
     "examples/rust-fetch",
 ]
@@ -79,3 +73,9 @@ wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-parser = "0.3.1"
 bytes = "1.3.0"
 http = "0.2.8"
+tokio = { version = "1.24.1", features = ["full"] }
+reqwest = { version = "0.11.13", features = ["rustls-tls"] }
+tracing = { version = "0.1.37", features = [
+    "max_level_debug",
+    "release_max_level_info"
+] }

@@ -17,7 +17,7 @@ impl Manager {
 #[async_trait]
 impl managed::Manager for Manager {
     type Type = Worker;
-    type Error = crate::common::errors::Error;
+    type Error = super::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
         Ok(Worker::new(&self.path, self.enable_wasi).await?)
@@ -33,9 +33,9 @@ pub type Pool = managed::Pool<Manager>;
 #[tokio::test]
 async fn run_worker_pool_test() {
     use super::{Manager, Pool};
-    use crate::wit::Request;
+    use leaf_host_impl::http::Request;
 
-    let sample_wasm_file = "./tests/sample.wasm";
+    let sample_wasm_file = "../../tests/sample.wasm";
     let mgr = Manager::new(sample_wasm_file.to_string(), false);
     let pool = Pool::builder(mgr).build().unwrap();
 

@@ -1,0 +1,17 @@
+[package]
+name = "leaf-worker"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = { workspace = true }
+async-trait = { workspace = true }
+deadpool = { version = "0.9.5", features = ["rt_tokio_1"] }
+leaf-host-impl = { path = "../leaf-host-impl" }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+wasi-host = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "host" }
+wasi-host-cap-std-sync = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "wasi-cap-std-sync" }
+wasmtime = { workspace = true }

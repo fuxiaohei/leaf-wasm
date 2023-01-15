@@ -6,19 +6,10 @@ use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
 /// ManifestBuild is the build section of the manifest
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ManifestBuild {
     pub rust_target_dir: Option<String>,
     pub rust_enable_wasi: Option<bool>,
-}
-
-impl Default for ManifestBuild {
-    fn default() -> Self {
-        Self {
-            rust_target_dir: None,
-            rust_enable_wasi: None,
-        }
-    }
 }
 
 /// Manifest is the manifest struct
@@ -67,10 +58,10 @@ impl Manifest {
         let target = self
             .build
             .clone()
-            .unwrap_or(ManifestBuild::default())
+            .unwrap_or_default()
             .rust_target_dir
-            .unwrap_or("target".to_string());
-        let arch = self.compile_arch().unwrap_or("rust".to_string());
+            .unwrap_or_else(|| "target".to_string());
+        let arch = self.compile_arch().unwrap_or_else(|_| "rust".to_string());
         let target_dir = Path::new(&target).join(arch).join("release");
         let name = self.name.replace('-', "_") + ".wasm";
         match self.language.as_str() {
@@ -97,7 +88,7 @@ impl Manifest {
                 let flag = self
                     .build
                     .clone()
-                    .unwrap_or(ManifestBuild::default())
+                    .unwrap_or_default()
                     .rust_enable_wasi
                     .unwrap_or(false);
                 if flag {
@@ -117,7 +108,7 @@ impl Manifest {
                 let flag = self
                     .build
                     .clone()
-                    .unwrap_or(ManifestBuild::default())
+                    .unwrap_or_default()
                     .rust_enable_wasi
                     .unwrap_or(false);
                 Ok(flag)

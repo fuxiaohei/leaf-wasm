@@ -1,11 +1,10 @@
 use crate::common::errors::Error;
-use crate::wasm::{Manager, Pool};
-use crate::wit::{Request as LeafRequest, Response as LeafResponse};
 use futures::future::{self, Ready};
 use hyper::{
     body::Body, http::StatusCode, server::conn::AddrStream, service::Service, Request, Response,
 };
-use log::{info, warn};
+use leaf_host_impl::http::{Request as LeafRequest, Response as LeafResponse};
+use leaf_worker::{Manager, Pool};
 use once_cell::sync::OnceCell;
 use std::sync::{atomic::AtomicU64, Arc};
 use std::{
@@ -15,6 +14,7 @@ use std::{
     task::{Context, Poll},
 };
 use tokio::time::Instant;
+use tracing::{info, warn};
 
 static POOL: OnceCell<Pool> = OnceCell::new();
 

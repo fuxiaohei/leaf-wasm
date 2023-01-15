@@ -1,14 +1,14 @@
 wasmtime::component::bindgen!({
-    path: "./wit/http-fetch.wit",
+    path: "../../wit/http-fetch.wit",
     async: true,
 });
 
 use async_trait::async_trait;
 use http_fetch::{FetchOptions, HttpError, RedirectPolicy, Request, Response};
-use log::{info, warn};
 use reqwest::redirect;
 use std::str::FromStr;
 use tokio::time::Instant;
+use tracing::{info, warn};
 
 impl Default for FetchOptions {
     fn default() -> Self {
