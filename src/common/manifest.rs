@@ -1,8 +1,27 @@
+use std::path::Path;
+
 use crate::common::errors::Error;
 use crate::common::vars::*;
 use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 
+/// ManifestBuild is the build section of the manifest
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ManifestBuild {
+    pub rust_target_dir: Option<String>,
+    pub rust_enable_wasi: Option<bool>,
+}
+
+impl Default for ManifestBuild {
+    fn default() -> Self {
+        Self {
+            rust_target_dir: None,
+            rust_enable_wasi: None,
+        }
+    }
+}
+
+/// Manifest is the manifest struct
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Manifest {
     pub manifest: String,
@@ -10,6 +29,8 @@ pub struct Manifest {
     pub description: String,
     pub authors: Vec<String>,
     pub language: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub build: Option<ManifestBuild>,
 }
 
 impl Default for Manifest {
@@ -20,6 +41,7 @@ impl Default for Manifest {
             description: String::from("leaf wasm project"),
             authors: vec![],
             language: String::from("rust"),
+            build: None,
         }
     }
 }
@@ -41,29 +63,29 @@ impl Manifest {
     }
 
     /// determine compiling target file, before optimized
-    pub fn compiling_target(&self, target_dir: Option<String>) -> Result<String> {
-        let name = self.name.replace('-', "_");
-        let target_dir = match target_dir {
-            Some(dir) => dir,
-            None => RUST_TARGET_WASM_RELEASE_DIR.to_string(),
-        };
+    pub fn compiling_target(&self) -> Result<String> {
+        let target = self
+            .build
+            .clone()
+            .unwrap_or(ManifestBuild::default())
+            .rust_target_dir
+            .unwrap_or("target".to_string());
+        let arch = self.compile_arch().unwrap_or("rust".to_string());
+        let target_dir = Path::new(&target).join(arch).join("release");
+        let name = self.name.replace('-', "_") + ".wasm";
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", target_dir, name)),
-            PROJECT_LANGUAGE_JS => Ok(format!("{}.wasm", name)),
+            PROJECT_LANGUAGE_RUST => Ok(target_dir.join(name).to_str().unwrap().to_string()),
+            PROJECT_LANGUAGE_JS => Ok(name),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
 
     /// determine optimized final target file
-    pub fn final_target(&self, target_dir: Option<String>) -> Result<String> {
-        let name = self.name.replace('-', "_");
-        let target_dir = match target_dir {
-            Some(dir) => dir,
-            None => RUST_TARGET_WASM_RELEASE_DIR.to_string(),
-        };
+    pub fn final_target(&self) -> Result<String> {
+        let compile_target = self.compiling_target();
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(format!("{}/{}.wasm", target_dir, name)),
-            PROJECT_LANGUAGE_JS => Ok(format!("{}_wizer.wasm", name)),
+            PROJECT_LANGUAGE_RUST => Ok(compile_target.unwrap()),
+            PROJECT_LANGUAGE_JS => Ok(compile_target.unwrap().replace(".wasm", "_wizer.wasm")),
             _ => Err(anyhow::Error::msg("unknown language")),
         }
     }
@@ -71,7 +93,18 @@ impl Manifest {
     /// determine compile arch
     pub fn compile_arch(&self) -> Result<String> {
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(COMPILE_TARGET_WASM32_UNKNOWN_UNKNOWN.to_string()),
+            PROJECT_LANGUAGE_RUST => {
+                let flag = self
+                    .build
+                    .clone()
+                    .unwrap_or(ManifestBuild::default())
+                    .rust_enable_wasi
+                    .unwrap_or(false);
+                if flag {
+                    return Ok(COMPILE_TARGET_WASM32_WASI.to_string());
+                }
+                Ok(COMPILE_TARGET_WASM32_UNKNOWN_UNKNOWN.to_string())
+            }
             PROJECT_LANGUAGE_JS => Ok(COMPILE_TARGET_WASM32_WASI.to_string()),
             _ => Err(anyhow::Error::msg("unknown compile target")),
         }
@@ -80,7 +113,15 @@ impl Manifest {
     /// determine enable wasi
     pub fn is_enable_wasi(&self) -> Result<bool> {
         match self.language.as_str() {
-            PROJECT_LANGUAGE_RUST => Ok(false),
+            PROJECT_LANGUAGE_RUST => {
+                let flag = self
+                    .build
+                    .clone()
+                    .unwrap_or(ManifestBuild::default())
+                    .rust_enable_wasi
+                    .unwrap_or(false);
+                Ok(flag)
+            }
             PROJECT_LANGUAGE_JS => Ok(true),
             _ => Err(anyhow::Error::msg("unknown language")),
         }

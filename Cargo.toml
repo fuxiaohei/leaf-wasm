@@ -6,7 +6,7 @@ edition = { workspace = true }
 default-run = "leaf-cli"
 
 [workspace.package]
-version = "0.1.17"
+version = "0.1.18"
 authors = ["fuxiaohei<fudong0797@gmail.com>"]
 edition = "2021"
 

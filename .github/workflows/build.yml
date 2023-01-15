@@ -38,8 +38,8 @@ jobs:
 
       - name: Build Examples
         run: |
-          (cd examples/rust-basic/ && ../../target/release/leaf-cli build --target-dir ../../target/wasm32-unknown-unknown/release)
-          (cd examples/rust-fetch/ && ../../target/release/leaf-cli build --target-dir ../../target/wasm32-unknown-unknown/release)
+          (cd examples/rust-basic/ && ../../target/release/leaf-cli build)
+          (cd examples/rust-fetch/ && ../../target/release/leaf-cli build)
 
       - name: Upload cli binary
         uses: actions/upload-artifact@v3

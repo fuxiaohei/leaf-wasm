@@ -60,13 +60,13 @@ impl Init {
         manifest.to_file(manifest_file.to_str().unwrap()).unwrap();
         info!("Created manifest: {}", manifest_file.to_str().unwrap());
 
-        match self.create_example(&self.name, self.template.as_ref().unwrap().as_str()) {
+        match self.create_project(&self.name, self.template.as_ref().unwrap().as_str()) {
             Ok(_) => info!("Created project: {}", &self.name),
             Err(e) => panic!("Create project failed: {}", e),
         }
     }
 
-    fn create_example(&self, name: &str, template: &str) -> anyhow::Result<()> {
+    fn create_project(&self, name: &str, template: &str) -> anyhow::Result<()> {
         // if template is rust, copy cargo.toml
         let toml = Path::new(template).join("Cargo.toml");
         debug!("[New] use cargo.toml path: {:?}", toml);
@@ -77,6 +77,7 @@ impl Init {
                 "path = \"../../crates/leaf-sdk\"",
                 "git = \"https://github.com/fuxiaohei/leaf-wasm\"",
             );
+            content = content.replace("[build]\ntarget_dir = \"../../target\"", "");
             let target = Path::new(name).join("Cargo.toml");
             std::fs::write(target, content)?;
         };
@@ -116,9 +117,6 @@ pub struct Build {
     /// Set js engine wasm file
     #[clap(long)]
     pub js_engine: Option<String>,
-    /// Set compiling target directory
-    #[clap(long)]
-    pub target_dir: Option<String>,
 }
 
 impl Build {
@@ -142,14 +140,14 @@ impl Build {
         if manifest.language == PROJECT_LANGUAGE_RUST {
             return leaf_compiler::compile_rust(
                 manifest.compile_arch().unwrap(),
-                manifest.compiling_target(self.target_dir.clone()).unwrap(),
+                manifest.compiling_target().unwrap(),
                 self.optimize,
                 self.debug,
             );
         }
         if manifest.language == PROJECT_LANGUAGE_JS {
             return leaf_compiler::compile_js(
-                manifest.compiling_target(self.target_dir.clone()).unwrap(),
+                manifest.compiling_target().unwrap(),
                 "src/index.js".to_string(),
                 self.js_engine.clone(),
             );
@@ -169,9 +167,6 @@ pub struct Serve {
     /// Enable wasi
     #[clap(long, default_value("false"))]
     pub enable_wasi: bool,
-    /// Set compiling target directory
-    #[clap(long)]
-    pub target_dir: Option<String>,
 }
 
 impl Serve {
@@ -206,7 +201,7 @@ impl Serve {
                 };
             }
 
-            match manifest.final_target(self.target_dir.clone()) {
+            match manifest.final_target() {
                 Ok(file) => file,
                 Err(e) => {
                     panic!("[Main] find wasm error: {}", e);
