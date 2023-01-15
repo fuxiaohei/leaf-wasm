@@ -1,7 +1,7 @@
 mod base;
 mod cmd;
 mod common;
-mod server;
+mod local_server;
 
 use clap::Parser;
 

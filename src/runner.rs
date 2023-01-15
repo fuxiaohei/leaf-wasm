@@ -1,8 +1,8 @@
 mod base;
+mod run_server;
 
 use clap::Parser;
 use std::net::SocketAddr;
-use tracing::info;
 
 /// Leaf Runner
 #[derive(Parser)]
@@ -19,10 +19,12 @@ struct RunnerArgs {
     pub addr: Option<SocketAddr>,
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     base::init_tracing();
 
     let args = RunnerArgs::parse();
-
-    info!("Hello World!, config: {}", args.config);
+    
+    // start server server
+    run_server::start(args.addr.unwrap()).await;
 }

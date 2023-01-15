@@ -1,7 +1,7 @@
 use crate::common::embed::TemplateAssets;
 use crate::common::manifest::Manifest;
 use crate::common::vars::*;
-use crate::server;
+use crate::local_server;
 use clap::Args;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
@@ -216,7 +216,7 @@ impl Serve {
         info!("[Worker] use file: {}", &wasm_file);
 
         // start local server
-        server::start(self.addr.unwrap(), wasm_file, enable_wasi).await;
+        local_server::start(self.addr.unwrap(), wasm_file, enable_wasi).await;
     }
 }
 
