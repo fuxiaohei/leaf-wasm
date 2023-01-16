@@ -19,3 +19,6 @@ Cargo.lock
 
 # Wasm
 *.wasm
+
+# Wasm dir for testing
+wasm_dir/

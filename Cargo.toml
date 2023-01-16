@@ -21,6 +21,7 @@ lazy_static = "1.4.0"
 leaf-compiler = { path = "./crates/leaf-compiler" }
 leaf-host-impl = { path = "./crates/leaf-host-impl" }
 leaf-worker = { path = "./crates/leaf-worker" }
+mini-moka = "0.10.0"
 once_cell = "1.17.0"
 reqwest = { workspace = true }
 rust-embed = "6.4.2"
