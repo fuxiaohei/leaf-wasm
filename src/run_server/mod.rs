@@ -1,6 +1,9 @@
 mod config;
 pub use config::RunnerConfig;
 
+mod admin;
+pub use admin::start_admin;
+
 use futures::future::{self, Ready};
 use hyper::{
     body::Body, http::StatusCode, server::conn::AddrStream, service::Service, Request, Response,
@@ -199,7 +202,7 @@ pub async fn start(addr: SocketAddr, config: super::RunnerConfig) {
     }
 }
 
-fn create_response(status: StatusCode, message: String) -> Response<Body> {
+pub fn create_response(status: StatusCode, message: String) -> Response<Body> {
     Response::builder()
         .status(status)
         .body(Body::from(message))

@@ -20,6 +20,9 @@ struct RunnerArgs {
     /// The port to listen on
     #[clap(long, default_value("0.0.0.0:19988"))]
     pub addr: Option<SocketAddr>,
+    /// The port to listen on admin address
+    #[clap(long, default_value("0.0.0.0:19989"))]
+    pub admin_addr: Option<SocketAddr>,
 }
 
 #[tokio::main]
@@ -41,6 +44,12 @@ async fn main() {
     };
     debug!("[Runner] config: {:?}", config);
 
+    let config2 = config.clone();
+
+    tokio::spawn(async move {
+        run_server::start_admin(args.admin_addr.unwrap(), config.clone()).await;
+    });
+
     // start server server
-    run_server::start(args.addr.unwrap(), config).await;
+    run_server::start(args.addr.unwrap(), config2).await;
 }
