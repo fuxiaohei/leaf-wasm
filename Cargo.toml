@@ -67,7 +67,7 @@ thiserror = "1.0.38"
 wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = [
     "component-model",
     "async"
-] }
+], rev = "b86cba98" }
 wit-component = "0.3.2"
 wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
