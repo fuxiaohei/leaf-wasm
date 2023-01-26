@@ -24,9 +24,16 @@ fn build_wit_guest_code() {
         if wit_file_path.extension().unwrap() != "wit" {
             continue;
         }
-        let (target_rs, target_rs_content) =
-            leaf_compiler::gen_rust_guest_code(wit_file_path.to_str().unwrap()).unwrap();
-        std::fs::write(target_rs, target_rs_content).unwrap();
+        let outputs = leaf_compiler::generate_world_guest(
+            wit_file_path.to_str().unwrap(),
+            None,
+            leaf_compiler::GuestGeneratorType::Rust,
+        )
+        .unwrap();
+        outputs.iter().for_each(|(path, content)| {
+            let target_rs = wit_dir.join(path);
+            std::fs::write(target_rs, content).unwrap();
+        });
 
         // leaf_compiler::gen_js_host_code(wit_file_path.to_str().unwrap()).unwrap();
     }

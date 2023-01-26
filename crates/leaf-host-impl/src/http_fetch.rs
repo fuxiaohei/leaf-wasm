@@ -1,4 +1,5 @@
 wasmtime::component::bindgen!({
+    world:"http-fetch",
     path: "../../wit/http-fetch.wit",
     async: true,
 });

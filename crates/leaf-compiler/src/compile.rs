@@ -65,13 +65,13 @@ fn try_wasm_optimize(path: &str) {
 }
 
 pub fn encode_wasm_component(path: &str, output: Option<String>) {
-    let file_bytes = std::fs::read(path).expect("Read wasm file error");
+    let file_bytes = wat::parse_file(path).expect("Wat parse wasm file error");
     let wasi_adapter = include_bytes!("../engine/wasi_snapshot_preview1.wasm");
 
     let component = ComponentEncoder::default()
-        .module(file_bytes.as_slice())
+        .validate(false)
+        .module(&file_bytes)
         .expect("Pull custom sections from module")
-        .validate(true)
         .adapter("wasi_snapshot_preview1", wasi_adapter)
         .unwrap()
         .encode()

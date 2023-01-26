@@ -1,14 +1,26 @@
 #[allow(clippy::all)]
 pub mod http_handler {
-    #[allow(unused_imports)]
-    use wit_bindgen_guest_rust::rt::{alloc, string::String, vec::Vec};
-
-    pub type RequestId = u64;
-    pub type Status = u16;
-    pub type Headers = Vec<(String, String)>;
     pub type Uri = String;
-    pub type Body = Vec<u8>;
+    pub type Status = u16;
+    pub type RequestId = u64;
     pub type Method = String;
+    pub type Headers = Vec<(String, String)>;
+    pub type Body = Vec<u8>;
+    #[derive(Clone)]
+    pub struct Response {
+        pub status: Status,
+        pub headers: Headers,
+        pub body: Option<Body>,
+    }
+    impl core::fmt::Debug for Response {
+        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+            f.debug_struct("Response")
+                .field("status", &self.status)
+                .field("headers", &self.headers)
+                .field("body", &self.body)
+                .finish()
+        }
+    }
     #[derive(Clone)]
     pub struct Request {
         pub request_id: RequestId,
@@ -23,21 +35,6 @@ pub mod http_handler {
                 .field("request-id", &self.request_id)
                 .field("method", &self.method)
                 .field("uri", &self.uri)
-                .field("headers", &self.headers)
-                .field("body", &self.body)
-                .finish()
-        }
-    }
-    #[derive(Clone)]
-    pub struct Response {
-        pub status: Status,
-        pub headers: Headers,
-        pub body: Option<Body>,
-    }
-    impl core::fmt::Debug for Response {
-        fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-            f.debug_struct("Response")
-                .field("status", &self.status)
                 .field("headers", &self.headers)
                 .field("body", &self.body)
                 .finish()
@@ -103,7 +100,7 @@ pub mod http_handler {
                 _ => panic!("invalid enum discriminant"),
             },
         });
-        let ptr7 = RET_AREA.0.as_mut_ptr() as i32;
+        let ptr7 = _RET_AREA.0.as_mut_ptr() as i32;
         let Response {
             status: status8,
             headers: headers8,
@@ -189,9 +186,12 @@ pub mod http_handler {
         }
     }
 
+    #[allow(unused_imports)]
+    use wit_bindgen_guest_rust::rt::{alloc, string::String, vec::Vec};
+
     #[repr(align(4))]
-    struct HttpHandlerRetArea([u8; 24]);
-    static mut RET_AREA: HttpHandlerRetArea = HttpHandlerRetArea([0; 24]);
+    struct _RetArea([u8; 24]);
+    static mut _RET_AREA: _RetArea = _RetArea([0; 24]);
 }
 
 /// Declares the export of the component's world for the
@@ -201,16 +201,16 @@ macro_rules! export_http_handler(($t:ident) => {
     const _: () = {
 
       #[doc(hidden)]
-      #[export_name = "handle-request"]
+      #[export_name = "http-handler#handle-request"]
       #[allow(non_snake_case)]
-      unsafe extern "C" fn __export_exports_handle_request(arg0: i64,arg1: i32,arg2: i32,arg3: i32,arg4: i32,arg5: i32,arg6: i32,arg7: i32,arg8: i32,arg9: i32,) -> i32 {
+      unsafe extern "C" fn __export_http_handler_handle_request(arg0: i64,arg1: i32,arg2: i32,arg3: i32,arg4: i32,arg5: i32,arg6: i32,arg7: i32,arg8: i32,arg9: i32,) -> i32 {
         http_handler::call_handle_request::<$t>(arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8,arg9,)
       }
 
       #[doc(hidden)]
-      #[export_name = "cabi_post_handle-request"]
+      #[export_name = "cabi_post_http-handler#handle-request"]
       #[allow(non_snake_case)]
-      unsafe extern "C" fn __post_return_exports_handle_request(arg0: i32,) {
+      unsafe extern "C" fn __post_return_http_handler_handle_request(arg0: i32,) {
         http_handler::post_return_handle_request::<$t>(arg0,)
       }
 
@@ -229,17 +229,40 @@ macro_rules! export_http_handler(($t:ident) => {
 
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:http-handler"]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 220] = [
-    1, 0, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 0, 97, 115, 109, 10, 0, 1,
-    0, 7, 91, 11, 119, 115, 115, 111, 2, 115, 115, 112, 3, 112, 125, 107, 5, 114, 5, 10, 114, 101,
-    113, 117, 101, 115, 116, 45, 105, 100, 0, 6, 109, 101, 116, 104, 111, 100, 1, 3, 117, 114, 105,
-    2, 7, 104, 101, 97, 100, 101, 114, 115, 4, 4, 98, 111, 100, 121, 6, 123, 114, 3, 6, 115, 116,
-    97, 116, 117, 115, 8, 7, 104, 101, 97, 100, 101, 114, 115, 4, 4, 98, 111, 100, 121, 6, 64, 1,
-    3, 114, 101, 113, 7, 0, 9, 11, 102, 9, 10, 114, 101, 113, 117, 101, 115, 116, 45, 105, 100, 0,
-    3, 0, 6, 115, 116, 97, 116, 117, 115, 0, 3, 8, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 4, 3,
-    117, 114, 105, 0, 3, 2, 4, 98, 111, 100, 121, 0, 3, 5, 6, 109, 101, 116, 104, 111, 100, 0, 3,
-    1, 7, 114, 101, 113, 117, 101, 115, 116, 0, 3, 7, 8, 114, 101, 115, 112, 111, 110, 115, 101, 0,
-    3, 9, 14, 104, 97, 110, 100, 108, 101, 45, 114, 101, 113, 117, 101, 115, 116, 0, 3, 10,
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 703] = [
+    2, 0, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 12, 104, 116, 116, 112, 45,
+    104, 97, 110, 100, 108, 101, 114, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114,
+    0, 97, 115, 109, 11, 0, 1, 0, 7, 231, 4, 1, 65, 4, 1, 66, 20, 1, 115, 4, 3, 117, 114, 105, 0,
+    3, 0, 0, 1, 123, 4, 6, 115, 116, 97, 116, 117, 115, 0, 3, 0, 2, 1, 119, 4, 10, 114, 101, 113,
+    117, 101, 115, 116, 45, 105, 100, 0, 3, 0, 4, 1, 115, 4, 6, 109, 101, 116, 104, 111, 100, 0, 3,
+    0, 6, 1, 111, 2, 115, 115, 1, 112, 8, 4, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 0, 9, 1,
+    112, 125, 4, 4, 98, 111, 100, 121, 0, 3, 0, 11, 1, 107, 12, 1, 114, 3, 6, 115, 116, 97, 116,
+    117, 115, 3, 7, 104, 101, 97, 100, 101, 114, 115, 10, 4, 98, 111, 100, 121, 13, 4, 8, 114, 101,
+    115, 112, 111, 110, 115, 101, 0, 3, 0, 14, 1, 114, 5, 10, 114, 101, 113, 117, 101, 115, 116,
+    45, 105, 100, 5, 6, 109, 101, 116, 104, 111, 100, 7, 3, 117, 114, 105, 1, 7, 104, 101, 97, 100,
+    101, 114, 115, 10, 4, 98, 111, 100, 121, 13, 4, 7, 114, 101, 113, 117, 101, 115, 116, 0, 3, 0,
+    16, 1, 64, 1, 3, 114, 101, 113, 17, 0, 15, 4, 14, 104, 97, 110, 100, 108, 101, 45, 114, 101,
+    113, 117, 101, 115, 116, 0, 1, 18, 4, 20, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101,
+    114, 45, 101, 120, 112, 111, 114, 116, 115, 38, 112, 107, 103, 58, 47, 104, 116, 116, 112, 45,
+    104, 97, 110, 100, 108, 101, 114, 47, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114,
+    45, 101, 120, 112, 111, 114, 116, 115, 5, 0, 1, 65, 2, 1, 66, 20, 1, 115, 4, 3, 117, 114, 105,
+    0, 3, 0, 0, 1, 123, 4, 6, 115, 116, 97, 116, 117, 115, 0, 3, 0, 2, 1, 119, 4, 10, 114, 101,
+    113, 117, 101, 115, 116, 45, 105, 100, 0, 3, 0, 4, 1, 115, 4, 6, 109, 101, 116, 104, 111, 100,
+    0, 3, 0, 6, 1, 111, 2, 115, 115, 1, 112, 8, 4, 7, 104, 101, 97, 100, 101, 114, 115, 0, 3, 0, 9,
+    1, 112, 125, 4, 4, 98, 111, 100, 121, 0, 3, 0, 11, 1, 107, 12, 1, 114, 3, 6, 115, 116, 97, 116,
+    117, 115, 3, 7, 104, 101, 97, 100, 101, 114, 115, 10, 4, 98, 111, 100, 121, 13, 4, 8, 114, 101,
+    115, 112, 111, 110, 115, 101, 0, 3, 0, 14, 1, 114, 5, 10, 114, 101, 113, 117, 101, 115, 116,
+    45, 105, 100, 5, 6, 109, 101, 116, 104, 111, 100, 7, 3, 117, 114, 105, 1, 7, 104, 101, 97, 100,
+    101, 114, 115, 10, 4, 98, 111, 100, 121, 13, 4, 7, 114, 101, 113, 117, 101, 115, 116, 0, 3, 0,
+    16, 1, 64, 1, 3, 114, 101, 113, 17, 0, 15, 4, 14, 104, 97, 110, 100, 108, 101, 45, 114, 101,
+    113, 117, 101, 115, 116, 0, 1, 18, 4, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101,
+    114, 38, 112, 107, 103, 58, 47, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 47,
+    104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 45, 101, 120, 112, 111, 114, 116,
+    115, 5, 0, 4, 12, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 30, 112, 107, 103,
+    58, 47, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108, 101, 114, 47, 104, 116, 116, 112, 45,
+    104, 97, 110, 100, 108, 101, 114, 4, 1, 11, 34, 1, 12, 104, 116, 116, 112, 45, 104, 97, 110,
+    100, 108, 101, 114, 17, 112, 107, 103, 58, 47, 104, 116, 116, 112, 45, 104, 97, 110, 100, 108,
+    101, 114, 3, 0,
 ];
 
 #[inline(never)]

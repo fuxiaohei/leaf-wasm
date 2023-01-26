@@ -12,6 +12,6 @@ leaf-host-impl = { path = "../leaf-host-impl" }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-wasi-host = { git = "https://github.com/fuxiaohei/preview2-prototyping", package = "host", branch = "fix-commit" }
-wasi-host-cap-std-sync = { git = "https://github.com/fuxiaohei/preview2-prototyping", package = "wasi-cap-std-sync", branch = "fix-commit" }
+wasi-host = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "host" }
+wasi-host-cap-std-sync = { git = "https://github.com/bytecodealliance/preview2-prototyping", package = "wasi-cap-std-sync" }
 wasmtime = { workspace = true }

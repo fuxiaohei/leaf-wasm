@@ -1,4 +1,4 @@
-interface exports {
+interface http-handler-exports {
     // request id
     type request-id = u64
     // status code
@@ -30,6 +30,6 @@ interface exports {
 }
 
 // world imports and exports
-world http-handler {
-  default export exports
+default world http-handler {
+    export http-handler: self.http-handler-exports
 }

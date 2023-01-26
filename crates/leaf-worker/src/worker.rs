@@ -128,6 +128,7 @@ impl Worker {
         store.data_mut().fetch().req_id = req.request_id;
         let exports = self.exports.as_ref().unwrap();
         let res = exports
+            .http_handler()
             .handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
@@ -150,6 +151,7 @@ impl Worker {
         let exports =
             HttpHandler::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
         let res = exports
+            .http_handler()
             .handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
@@ -176,7 +178,7 @@ async fn run_wasm_worker_test() {
     use super::Worker;
     use leaf_host_impl::http::Request;
 
-    let sample_wasm_file =  "../../tests/sample.wasm";
+    let sample_wasm_file = "../../tests/sample.wasm";
 
     let mut worker = Worker::new(sample_wasm_file, false).await.unwrap();
 
@@ -212,7 +214,7 @@ async fn run_wasi_worker_test() {
     use leaf_host_impl::http::Request;
 
     // TODO: use real wasi wasm file
-    let sample_wasm_file =  "../../tests/sample.wasm";
+    let sample_wasm_file = "../../tests/sample.wasm";
 
     let mut worker = Worker::new(sample_wasm_file, true).await.unwrap();
 

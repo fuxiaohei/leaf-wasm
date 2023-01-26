@@ -61,6 +61,6 @@ interface http-imports {
 
 
 // world imports and exports
-world http-fetch {
-    import http-fetch: http-imports
+default world http-fetch {
+    import http-fetch: self.http-imports
 }

@@ -3,12 +3,14 @@
 `sample.wasm` source is:
 
 ```rust
-use leaf_sdk::http::{Request, Response};
-use leaf_sdk_macro::http_main;
+use leaf_sdk::{
+    http::{Request, Response},
+    http_main,
+};
 use std::str::FromStr;
 
 #[http_main]
-pub fn handle_sdk_http(req: Request) -> Response {
+pub fn handle_sdk_http(mut req: Request) -> Response {
     let url = req.uri().clone();
     let method = req.method().to_string().to_uppercase();
     let body = req.into_body();
@@ -20,6 +22,7 @@ pub fn handle_sdk_http(req: Request) -> Response {
         .unwrap();
     resp
 }
+
 ```
 
 use `leaf-cli` to create sample project and replace `src/lib.rs` with `sample.wasm` source. Then run `leaf-cli compile` and target is in `target/wasm32-unknown-unknown/release/{project_name}.wasm`.
