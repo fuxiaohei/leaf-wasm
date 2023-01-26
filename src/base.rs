@@ -32,7 +32,8 @@ pub fn init_tracing() {
     );
 
     tracing_subscriber::fmt()
-        .with_max_level(tracing::Level::TRACE)
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .with_max_level(tracing::Level::DEBUG)
         .with_timer(timer)
         .with_target(false)
         .init();

@@ -227,6 +227,9 @@ pub struct Component {
     /// Set output filename
     #[clap(long)]
     pub output: Option<String>,
+    /// Set enabled wasi
+    #[clap(long, default_value("true"))]
+    pub enable_wasi: bool,
 }
 
 impl Component {
@@ -238,6 +241,6 @@ impl Component {
             .output
             .clone()
             .unwrap_or_else(|| "component.wasm".to_string());
-        leaf_compiler::encode_wasm_component(&self.input, Some(output));
+        leaf_compiler::encode_wasm_component(&self.input, Some(output), self.enable_wasi);
     }
 }

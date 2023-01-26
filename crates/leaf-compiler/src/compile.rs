@@ -14,7 +14,7 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
     }
     let child = cmd
         .arg("--target")
-        .arg(arch)
+        .arg(arch.clone())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .spawn()
@@ -33,7 +33,7 @@ pub fn compile_rust(arch: String, target: String, optimize: bool, debug: bool) -
     if optimize {
         try_wasm_optimize(&target);
     }
-    encode_wasm_component(&target, None);
+    encode_wasm_component(&target, None, arch == "wasm32-wasi");
     Ok(())
 }
 
@@ -64,18 +64,21 @@ fn try_wasm_optimize(path: &str) {
     }
 }
 
-pub fn encode_wasm_component(path: &str, output: Option<String>) {
+pub fn encode_wasm_component(path: &str, output: Option<String>, enable_wasi: bool) {
     let file_bytes = wat::parse_file(path).expect("Wat parse wasm file error");
     let wasi_adapter = include_bytes!("../engine/wasi_snapshot_preview1.wasm");
 
-    let component = ComponentEncoder::default()
-        .validate(false)
+    let mut component = ComponentEncoder::default()
         .module(&file_bytes)
         .expect("Pull custom sections from module")
-        .adapter("wasi_snapshot_preview1", wasi_adapter)
-        .unwrap()
-        .encode()
-        .expect("Encode component");
+        .validate(true);
+    if enable_wasi {
+        info!("Enable wasi adapter");
+        component = component
+            .adapter("wasi_snapshot_preview1", wasi_adapter)
+            .expect("Add adapter to component")
+    }
+    let component = component.encode().expect("Encode component");
 
     let output = output.unwrap_or_else(|| path.to_string());
     std::fs::write(&output, component).expect("Write component file error");
@@ -148,7 +151,7 @@ pub fn compile_js(
         panic!("Wizer failed: {:?}", output);
     }
 
-    encode_wasm_component(&wizer_target, None);
+    encode_wasm_component(&wizer_target, None, true);
 
     Ok(())
 }
