@@ -32,10 +32,10 @@ fn reload_wasm(req: Request<Body>, wasm_dir: String) -> Response<Body> {
     }
     let wasm_path = Path::new(&wasm_dir).join(&wasm_file);
     if !wasm_path.exists() {
-        warn!("[admin] reload file not found: {:?}", wasm_path);
+        warn!("[admin] reload file not found: {wasm_path:?}");
         let resp = super::create_response(
             StatusCode::BAD_REQUEST,
-            format!("file not found: {:?}", wasm_path),
+            format!("file not found: {wasm_path:?}"),
         );
         return resp;
     }
@@ -43,8 +43,8 @@ fn reload_wasm(req: Request<Body>, wasm_dir: String) -> Response<Body> {
     let pool = Pool::builder(mgr).build().unwrap();
     let wasm_key = wasm_file.clone();
 
-    super::WORKERS_CACHE.insert(wasm_key, pool.clone());
-    info!("[admin] reload wasm ok: {:?}", wasm_file);
+    super::WORKERS_CACHE.insert(wasm_key, pool);
+    info!("[admin] reload wasm ok: {wasm_file:?}");
 
     super::create_response(StatusCode::OK, "ok".to_string())
 }
@@ -117,7 +117,7 @@ pub async fn start_admin(addr: SocketAddr, config: super::RunnerConfig) {
     let server = match Server::try_bind(&addr) {
         Ok(server) => server.serve(AdminSvrCtx::new(config)),
         Err(e) => {
-            panic!("[admin] starting failed to bind: {}", e);
+            panic!("[admin] starting failed to bind: {e}");
         }
     };
 
@@ -125,6 +125,6 @@ pub async fn start_admin(addr: SocketAddr, config: super::RunnerConfig) {
 
     // Run this server for... forever!
     if let Err(e) = server.await {
-        panic!("[admin] starting error: {}", e);
+        panic!("[admin] starting error: {e}");
     }
 }

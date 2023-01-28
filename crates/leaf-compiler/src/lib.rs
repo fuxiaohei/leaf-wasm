@@ -23,7 +23,7 @@ pub fn generate_world_guest(
     }
 
     let mut resolve = Resolve::default();
-    let pkg = resolve.push(UnresolvedPackage::parse_file(&path)?, &Default::default())?;
+    let pkg = resolve.push(UnresolvedPackage::parse_file(path)?, &Default::default())?;
 
     let world = match &world {
         Some(world) => {

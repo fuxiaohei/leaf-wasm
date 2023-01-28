@@ -60,7 +60,7 @@ fn try_wasm_optimize(path: &str) {
     if output.status.success() {
         info!("Wasm-opt success");
     } else {
-        panic!("Wasm-opt failed: {:?}", output);
+        panic!("Wasm-opt failed: {output:?}");
     }
 }
 
@@ -148,7 +148,7 @@ pub fn compile_js(
         );
         info!("Wizer success: {}", &wizer_target);
     } else {
-        panic!("Wizer failed: {:?}", output);
+        panic!("Wizer failed: {output:?}");
     }
 
     encode_wasm_component(&wizer_target, None, true);

@@ -185,7 +185,7 @@ pub async fn start(addr: SocketAddr, config: super::RunnerConfig) {
     let server = match Server::try_bind(&addr) {
         Ok(server) => server.serve(ServerContext { config }),
         Err(e) => {
-            panic!("[Server] starting failed to bind: {}", e);
+            panic!("[Server] starting failed to bind: {e}");
         }
     };
 
@@ -193,7 +193,7 @@ pub async fn start(addr: SocketAddr, config: super::RunnerConfig) {
 
     // Run this server for... forever!
     if let Err(e) = server.await {
-        panic!("[Server] starting error: {}", e);
+        panic!("[Server] starting error: {e}");
     }
 }
 

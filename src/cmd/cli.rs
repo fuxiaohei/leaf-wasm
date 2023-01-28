@@ -62,7 +62,7 @@ impl Init {
 
         match self.create_project(&self.name, self.template.as_ref().unwrap().as_str()) {
             Ok(_) => info!("Created project: {}", &self.name),
-            Err(e) => panic!("Create project failed: {}", e),
+            Err(e) => panic!("Create project failed: {e}"),
         }
     }
 
@@ -126,13 +126,13 @@ impl Build {
         let manifest = match Manifest::from_file(manifest_file) {
             Ok(manifest) => manifest,
             Err(e) => {
-                panic!("read manifest file error: {}", e);
+                panic!("read manifest file error: {e}");
             }
         };
         info!("Read manifest '{:?}'", manifest_file);
         match self.build(&manifest) {
             Ok(_) => info!("Compile success"),
-            Err(e) => panic!("Compile failed: {}", e),
+            Err(e) => panic!("Compile failed: {e}"),
         }
     }
 
@@ -184,7 +184,7 @@ impl Serve {
             let manifest = match Manifest::from_file(manifest_file) {
                 Ok(manifest) => manifest,
                 Err(e) => {
-                    panic!("read manifest file error: {}", e);
+                    panic!("read manifest file error: {e}");
                 }
             };
             info!("[Main] read manifest '{:?}'", manifest_file);
@@ -196,7 +196,7 @@ impl Serve {
                         enable_wasi
                     }
                     Err(e) => {
-                        panic!("determine enable_wasi error: {}", e);
+                        panic!("determine enable_wasi error: {e}");
                     }
                 };
             }
@@ -204,7 +204,7 @@ impl Serve {
             match manifest.final_target() {
                 Ok(file) => file,
                 Err(e) => {
-                    panic!("[Main] find wasm error: {}", e);
+                    panic!("[Main] find wasm error: {e}");
                 }
             }
         };
