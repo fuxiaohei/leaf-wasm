@@ -1,8 +1,8 @@
 use anyhow::{bail, Result};
-use log::{debug, info};
 use std::io::Write;
 use std::path::PathBuf;
 use std::process::{Command, Stdio};
+use tracing::{debug, info};
 use which::which;
 use wit_component::ComponentEncoder;
 
