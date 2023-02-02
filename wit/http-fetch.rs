@@ -124,6 +124,9 @@ pub mod http_fetch {
         #[allow(unused_imports)]
         use wit_bindgen_guest_rust::rt::{alloc, string::String, vec::Vec};
         unsafe {
+            #[repr(align(4))]
+            struct RetArea([u8; 28]);
+            let mut ret_area = core::mem::MaybeUninit::<RetArea>::uninit();
             let Request {
                 method: method0,
                 uri: uri0,
@@ -179,12 +182,7 @@ pub mod http_fetch {
                 decompress: decompress9,
                 redirect: redirect9,
             } = options;
-
-            #[repr(align(4))]
-            struct RetArea([u8; 28]);
-            let mut ret_area = core::mem::MaybeUninit::<RetArea>::uninit();
             let ptr10 = ret_area.as_mut_ptr() as i32;
-
             #[link(wasm_import_module = "http-fetch")]
             extern "C" {
                 #[cfg_attr(target_arch = "wasm32", link_name = "fetch")]
