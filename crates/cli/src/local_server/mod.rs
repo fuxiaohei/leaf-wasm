@@ -34,7 +34,7 @@ async fn run_local_server_test() {
     let handle = tokio::spawn(async {
         start(
             "127.0.0.1:18899".parse().expect("wrong socket addr"),
-            "./tests/sample.wasm".to_string(),
+            "../../tests/sample.wasm".to_string(),
             false,
         )
         .await;

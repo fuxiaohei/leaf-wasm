@@ -1,0 +1,12 @@
+[package]
+name = "leaf-common"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = { workspace = true }
+serde = "1.0.152"
+serde_derive = "1.0.152"
+thiserror = { workspace = true }
+toml = { workspace = true }

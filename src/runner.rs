@@ -1,11 +1,11 @@
 mod base;
-mod run_server;
+
+use leaf_runner::run_server;
 
 use clap::Parser;
-use run_server::RunnerConfig;
 use std::net::SocketAddr;
 use std::path::Path;
-use tracing::log::debug;
+use tracing::debug;
 
 /// Leaf Runner
 #[derive(Parser)]
@@ -34,13 +34,13 @@ async fn main() {
     // load config from file
     let config = if Path::new(&args.config).exists() {
         debug!("[Runner] load config from file: {}", &args.config);
-        RunnerConfig::from_file(&args.config).unwrap()
+        run_server::RunnerConfig::from_file(&args.config).unwrap()
     } else {
         debug!(
             "[Runner] config file not found, use default config: {}",
             &args.config
         );
-        RunnerConfig::default()
+        run_server::RunnerConfig::default()
     };
     debug!("[Runner] config: {:?}", config);
 

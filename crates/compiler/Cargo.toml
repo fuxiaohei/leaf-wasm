@@ -8,10 +8,10 @@ edition = { workspace = true }
 anyhow = { workspace = true }
 id-arena = "2.2.1"
 thiserror = { workspace = true }
+tracing = { workspace = true }
+wat = { workspace = true }
 which = "4.4.0"
 wit-bindgen-core = { workspace = true }
 wit-bindgen-gen-guest-rust = { workspace = true }
 wit-component = { workspace = true }
 wit-parser = { workspace = true }
-wat = { workspace = true }
-tracing = { workspace = true }

@@ -1,7 +1,4 @@
 mod base;
-mod cmd;
-mod common;
-mod local_server;
 
 use clap::Parser;
 
@@ -13,13 +10,13 @@ use clap::Parser;
 )]
 enum LeafCli {
     /// Init creates a new leaf project
-    Init(cmd::cli::Init),
+    Init(leaf_cli::flags::Init),
     /// Build compiles the leaf project
-    Build(cmd::cli::Build),
+    Build(leaf_cli::flags::Build),
     /// Serve runs the leaf project
-    Serve(cmd::cli::Serve),
+    Serve(leaf_cli::flags::Serve),
     /// Component convert wasm module to component
-    Component(cmd::cli::Component),
+    Component(leaf_cli::flags::Component),
 }
 
 #[tokio::main]

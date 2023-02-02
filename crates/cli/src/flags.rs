@@ -1,8 +1,8 @@
-use crate::common::embed::TemplateAssets;
-use crate::common::manifest::Manifest;
-use crate::common::vars::*;
-use crate::local_server;
+use super::embed::TemplateAssets;
+use super::local_server;
 use clap::Args;
+use leaf_common::vars::*;
+use leaf_common::Manifest;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use tracing::{debug, error, info, warn};
@@ -74,7 +74,7 @@ impl Init {
             let mut content = std::str::from_utf8(&c.data)?.to_string();
             content = content.replace(template, name);
             content = content.replace(
-                "path = \"../../crates/leaf-sdk\"",
+                "path = \"../../crates/rust-sdk\"",
                 "git = \"https://github.com/fuxiaohei/leaf-wasm\"",
             );
             content = content.replace("[build]\ntarget_dir = \"../../target\"", "");

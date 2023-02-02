@@ -1,7 +1,7 @@
 use std::path::Path;
 
-use crate::common::errors::Error;
-use crate::common::vars::*;
+use super::errors::Error;
+use super::vars::*;
 use anyhow::Result;
 use serde_derive::{Deserialize, Serialize};
 

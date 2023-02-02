@@ -1,8 +1,8 @@
-use crate::common::errors::Error;
 use futures::future::{self, Ready};
 use hyper::{
     body::Body, http::StatusCode, server::conn::AddrStream, service::Service, Request, Response,
 };
+use leaf_common::errors::Error;
 use leaf_host_impl::http::{Request as LeafRequest, Response as LeafResponse};
 use leaf_worker::{Manager, Pool};
 use once_cell::sync::OnceCell;

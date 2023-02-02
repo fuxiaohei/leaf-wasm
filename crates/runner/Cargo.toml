@@ -1,0 +1,20 @@
+[package]
+name = "leaf-runner"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+tracing = { workspace = true }
+futures = { workspace = true }
+hyper = { workspace = true }
+tokio = { workspace = true }
+leaf-worker = { path = "../worker" }
+leaf-host-impl = { path = "../host-impl" }
+matchit = "0.7.0"
+mini-moka = "0.10.0"
+anyhow = { workspace = true }
+toml = { workspace = true }
+serde = "1.0.152"
+serde_derive = "1.0.152"
+lazy_static = "1.4.0"

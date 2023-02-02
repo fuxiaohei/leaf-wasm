@@ -8,5 +8,5 @@ edition = { workspace = true }
 anyhow = { workspace = true }
 bytes = { workspace = true }
 http = { workspace = true }
-leaf-sdk-macro = { path = "../leaf-sdk-macro" }
+leaf-sdk-macro = { path = "../rust-sdk-macro" }
 wit-bindgen-guest-rust = { workspace = true }
