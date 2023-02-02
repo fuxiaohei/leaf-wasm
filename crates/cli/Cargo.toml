@@ -6,7 +6,7 @@ edition = { workspace = true }
 
 [dependencies]
 anyhow = { workspace = true }
-clap = { workerspace = true }
+clap = { version = "4.1.4", features = ["derive"] }
 futures = { workspace = true }
 hyper = { workspace = true }
 leaf-common = { path = "../common" }

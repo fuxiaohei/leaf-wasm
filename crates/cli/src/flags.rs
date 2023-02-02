@@ -191,14 +191,14 @@ impl Serve {
 
             if !enable_wasi {
                 enable_wasi = match manifest.is_enable_wasi() {
-                    Ok(enable_wasi) => {
-                        info!("[Main] enable wasm32-wasi");
-                        enable_wasi
-                    }
+                    Ok(enable_wasi) => enable_wasi,
                     Err(e) => {
                         panic!("determine enable_wasi error: {e}");
                     }
                 };
+            }
+            if enable_wasi {
+                info!("[Main] enable wasm32-wasi");
             }
 
             match manifest.final_target() {
