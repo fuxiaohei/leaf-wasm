@@ -29,8 +29,8 @@ pub enum Error {
     ReadWasmComponent(anyhow::Error, String),
 
     /// failed to instantiate wasmtime component
-    #[error("failed to instantiate wasmtime component: {0}")]
-    InstantiateWasmComponent(anyhow::Error),
+    #[error("failed to instantiate wasmtime component: {0} at {1}")]
+    InstantiateWasmComponent(anyhow::Error, String),
 
     /// failed to invoke component export function
     #[error("failed to invoke component export function: {0}")]

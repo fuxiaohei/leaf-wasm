@@ -75,16 +75,20 @@ impl Worker {
         let ctx = Context::new(0);
         let mut store = Store::new(&self.engine, ctx);
         let mut linker: Linker<Context> = Linker::new(&self.engine);
-        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch)
-            .map_err(Error::InstantiateWasmComponent)?;
+        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "leaf_host_impl::http::add_to_linker".to_string())
+        })?;
         if self.enable_wasi {
-            wasi_host::add_to_linker(&mut linker, Context::wasi)
-                .map_err(Error::InstantiateWasmComponent)?;
+            wasi_host::add_to_linker(&mut linker, Context::wasi).map_err(|e| {
+                Error::InstantiateWasmComponent(e, "wasi_host::add_to_linker".to_string())
+            })?;
         }
         let (exports, instance) =
             HttpHandler::instantiate_async(&mut store, &self.component, &linker)
                 .await
-                .map_err(Error::InstantiateWasmComponent)?;
+                .map_err(|e| {
+                    Error::InstantiateWasmComponent(e, "HttpHandler::instantiate_async".to_string())
+                })?;
         self.instance = Some(instance);
         self.store = Some(store);
         self.exports = Some(exports);
@@ -102,15 +106,17 @@ impl Worker {
         let start_time = Instant::now();
         // create linker
         let mut linker: Linker<Context> = Linker::new(&self.engine);
-        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch)
-            .map_err(Error::InstantiateWasmComponent)?;
-        wasi_host::add_to_linker(&mut linker, Context::wasi)
-            .map_err(Error::InstantiateWasmComponent)?;
+        leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "leaf_host_impl::http::add_to_linker".to_string())
+        })?;
+        wasi_host::add_to_linker(&mut linker, Context::wasi).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "wasi_host::add_to_linker".to_string())
+        })?;
 
         // create instance_pre
-        let instance_pre = linker
-            .instantiate_pre(&self.component)
-            .map_err(Error::InstantiateWasmComponent)?;
+        let instance_pre = linker.instantiate_pre(&self.component).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "linker.instantiate_pre".to_string())
+        })?;
         self.instance_pre = Some(instance_pre);
         self.is_trapped = false;
         info!(
@@ -148,9 +154,15 @@ impl Worker {
             .unwrap()
             .instantiate_async(&mut store)
             .await
-            .map_err(Error::InstantiateWasmComponent)?;
-        let exports =
-            HttpHandler::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
+            .map_err(|e| {
+                Error::InstantiateWasmComponent(e, "instance_pre::instantiate_async".to_string())
+            })?;
+        let exports = HttpHandler::new(&mut store, &instance).map_err(|e| {
+            Error::InstantiateWasmComponent(
+                e,
+                "instance_pre::HttpHandler::instantiate_async".to_string(),
+            )
+        })?;
         let res = exports
             .http_handler()
             .call_handle_request(&mut store, req)

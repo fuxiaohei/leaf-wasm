@@ -1,5 +1,6 @@
 use super::embed::TemplateAssets;
 use super::local_server;
+use anyhow::Result;
 use clap::Args;
 use leaf_common::vars::*;
 use leaf_common::Manifest;
@@ -242,5 +243,56 @@ impl Component {
             .clone()
             .unwrap_or_else(|| "component.wasm".to_string());
         leaf_compiler::encode_wasm_component(&self.input, Some(output), self.enable_wasi);
+    }
+}
+
+#[derive(Args, Debug)]
+pub struct Test {
+    /// Set enabled wasi
+    #[clap(long, default_value("true"))]
+    pub enable_wasi: bool,
+}
+
+impl Test {
+    pub async fn run(&self) -> Result<()> {
+        // load manifest file
+        let manifest_file = DEFAULT_MANIFEST_FILE;
+        let manifest = match Manifest::from_file(manifest_file) {
+            Ok(manifest) => manifest,
+            Err(e) => {
+                panic!("read manifest file error: {e}");
+            }
+        };
+        info!("[Main] read manifest '{:?}'", manifest_file);
+
+        let enable_wasi = match manifest.is_enable_wasi() {
+            Ok(enable_wasi) => enable_wasi,
+            Err(e) => {
+                panic!("determine enable_wasi error: {e}");
+            }
+        };
+
+        let wasm_file = match manifest.final_target() {
+            Ok(file) => file,
+            Err(e) => {
+                panic!("[Main] find wasm error: {e}");
+            }
+        };
+
+        let mut worker = leaf_worker::Worker::new(&wasm_file, enable_wasi).await?;
+
+        let headers: Vec<(&str, &str)> = vec![];
+        let req = leaf_host_impl::http::Request {
+            request_id: 1,
+            method: "GET",
+            uri: "/abc",
+            headers: &headers,
+            body: Some("testing".as_bytes()),
+        };
+
+        let resp = worker.handle_request(req).await.unwrap();
+        println!("{:?}", resp);
+
+        Ok(())
     }
 }
