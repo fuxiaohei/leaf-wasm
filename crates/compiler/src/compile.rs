@@ -124,6 +124,7 @@ pub fn compile_js(
         .arg("--allow-wasi")
         .arg("--inherit-stdio=true")
         .arg("--inherit-env=true")
+        .arg("--wasm-bulk-memory=true")
         .stdin(Stdio::piped())
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
