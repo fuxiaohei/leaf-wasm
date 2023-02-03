@@ -102,12 +102,12 @@ impl Service<Request<Body>> for ServiceContext {
             let resp = builder.body(Body::from(resp.body.unwrap())).unwrap();
 
             info!(
-                "[Request] id={} {} {} {} {}ms",
+                "[Request] id={} {} {} {} {:?}",
                 req_id,
                 req.method(),
                 req.uri(),
                 resp.status(),
-                st.elapsed().as_millis()
+                st.elapsed()
             );
             Ok(resp)
         };

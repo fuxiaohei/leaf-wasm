@@ -69,11 +69,11 @@ wasmtime = { git = "https://github.com/bytecodealliance/wasmtime", features = [
     "component-model",
     "async"
 ] }
-wit-component = "0.4.4"
+wit-component = "0.5.0"
 wit-bindgen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen" }
 wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen" }
-wit-parser = "0.4.1"
+wit-parser = "0.5.0"
 bytes = "1.4.0"
 http = "0.2.8"
 tokio = { version = "1.25.0", features = ["full"] }
@@ -84,6 +84,6 @@ tracing = { version = "0.1.37", features = [
 ] }
 wat = "1.0.56"
 toml = "0.7.1"
-hyper = { version = "0.14.23", features = ["full"] }
+hyper = { version = "0.14.24", features = ["full"] }
 clap = { version = "4.1.4", features = ["derive"] }
 futures = "0.3.26"

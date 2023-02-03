@@ -1,4 +1,5 @@
-use super::{Context, Error};
+use super::Context;
+use leaf_common::errors::Error;
 use leaf_host_impl::http::{HttpHandler, Request as LeafRequest, Response as LeafResponse};
 use tokio::time::Instant;
 use tracing::info;
@@ -129,7 +130,7 @@ impl Worker {
         let exports = self.exports.as_ref().unwrap();
         let res = exports
             .http_handler()
-            .handle_request(&mut store, req)
+            .call_handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
         Ok(res)
@@ -152,7 +153,7 @@ impl Worker {
             HttpHandler::new(&mut store, &instance).map_err(Error::InstantiateWasmComponent)?;
         let res = exports
             .http_handler()
-            .handle_request(&mut store, req)
+            .call_handle_request(&mut store, req)
             .await
             .map_err(Error::InvokeComponentExportFunction)?;
         Ok(res)

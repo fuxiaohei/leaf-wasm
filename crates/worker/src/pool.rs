@@ -17,7 +17,7 @@ impl Manager {
 #[async_trait]
 impl managed::Manager for Manager {
     type Type = Worker;
-    type Error = super::Error;
+    type Error = leaf_common::errors::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
         Ok(Worker::new(&self.path, self.enable_wasi).await?)
