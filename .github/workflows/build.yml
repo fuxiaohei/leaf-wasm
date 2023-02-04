@@ -71,6 +71,7 @@ jobs:
           ./leaf-cli init hello-rust
           cd hello-rust
           ../leaf-cli build
+          ../leaf-cli test
 
   build_js_basic:
     runs-on: ubuntu-latest
@@ -98,3 +99,4 @@ jobs:
           ./leaf-cli init hello-js --template=js-basic
           cd hello-js
           ../leaf-cli build
+          ../leaf-cli test

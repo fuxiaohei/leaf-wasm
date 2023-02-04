@@ -15,7 +15,7 @@ impl Context {
         &mut self.fetch
     }
     pub fn new(req_id: u64) -> Self {
-        let wasi = WasiCtxBuilder::new().build();
+        let wasi = WasiCtxBuilder::new().inherit_stdio().build();
         Self {
             wasi,
             fetch: FetchImpl::new(req_id),
