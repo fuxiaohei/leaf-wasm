@@ -48,6 +48,10 @@ path = "src/cli.rs"
 name = "leaf-runner"
 path = "src/runner.rs"
 
+[[bin]]
+name = "leaf-backend"
+path = "src/backend.rs"
+
 [workspace]
 members = [
     "crates/cli",
