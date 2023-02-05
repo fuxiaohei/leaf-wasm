@@ -74,6 +74,7 @@ jobs:
           ../leaf-cli test
 
   build_js_basic:
+    if: ${{ false }} # FIXME: disable until wasi issue fixed
     runs-on: ubuntu-latest
     needs: build_all
     steps:
