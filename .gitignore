@@ -22,3 +22,6 @@
 
 # Wasm dir for testing
 wasm_dir/
+
+# Sqlite DB
+*.db
