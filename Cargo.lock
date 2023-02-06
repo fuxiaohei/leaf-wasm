@@ -2586,6 +2586,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "rust-kv"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "http",
+ "leaf-sdk",
+ "wit-bindgen-guest-rust",
+]
+
+[[package]]
 name = "rust_decimal"
 version = "1.28.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
