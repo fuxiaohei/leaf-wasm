@@ -5,28 +5,39 @@ networks:
     external: true
 
 services:
-  reverse-proxy:
-    # The official v2 Traefik docker image
-    image: traefik:v2.9
-    # Enables the web UI and tells Traefik to listen to docker
-    command: --api.insecure=true --providers.docker
+  redis-server:
+    image: redis:7.0
+    restart: always
     ports:
-      # The HTTP port
-      - "80:80"
-      # The Web UI (enabled by --api.insecure=true)
-      - "8080:8080"
+      - '6379:6379'
+    command: redis-server --save 20 1 --loglevel warning --requirepass f94c09e66e8864085ee1b435055cd8e79dcb7faf5d4bf5a52896ca1a589ea8b7
     volumes:
-      # So that Traefik can listen to the Docker events
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./redis_data:/data
     networks:
       - leaf_serverless_network
+  reverse-proxy:
+    image: traefik:v2.9
+    command: --api.insecure=true --providers.redis.endpoints=redis-server:6379 --providers.redis.password=f94c09e66e8864085ee1b435055cd8e79dcb7faf5d4bf5a52896ca1a589ea8b7
+    ports:
+      - "80:80"
+      - "8080:8080" # traefik dashboard
+    networks:
+      - leaf_serverless_network
+    depends_on:
+      - redis-server
   whoami:
-    # A container that exposes an API to show its IP address
-    image: traefik/whoami
-    labels:
-      - "traefik.http.middlewares.testHeader.headers.customrequestheaders.X-Wasm=user.wasm"
-      - "traefik.http.middlewares.testheader.headers.customrequestheaders.X-Custom-Request-Header=custom-header"
-      - "traefik.http.routers.whoami.rule=Host(`whoami.docker.localhost`)"
-      - "traefik.http.routers.whoami.middlewares=testHeader@docker"
+    image: traefik/whoami # example 
+    depends_on:
+      - reverse-proxy
+    networks:
+      - leaf_serverless_network
+  leaf-runner:
+    image: ghcr.io/fuxiaohei/leaf-runner:latest
+    depends_on:
+      - reverse-proxy
+    ports:
+      - '19980-19990:19988'
+    deploy:
+      replicas: 2
     networks:
       - leaf_serverless_network
