@@ -2,7 +2,6 @@ mod base;
 
 use clap::Parser;
 use std::net::SocketAddr;
-use tracing::{debug, info};
 
 /// Leaf Backend
 #[derive(Debug, Parser)]
@@ -24,6 +23,10 @@ async fn main() {
     base::init_tracing();
 
     let args = BackendArgs::parse();
-    debug!("Args: {:?}", args);
-    info!("Starting leaf-backend {}", base::get_version());
+
+    // init database
+    leaf_backend::init_db().await.unwrap();
+
+    // init server
+    leaf_backend::start(args.addr.unwrap()).await.unwrap();
 }

@@ -22,6 +22,7 @@ leaf-compiler = { path = "./crates/compiler" }
 leaf-host-impl = { path = "./crates/host-impl" }
 leaf-runner = { path = "./crates/runner" }
 leaf-worker = { path = "./crates/worker" }
+leaf-backend = { path = "./crates/backend" }
 reqwest = { workspace = true }
 thiserror = { workspace = true }
 time = "0.3.17"
@@ -53,17 +54,7 @@ name = "leaf-backend"
 path = "src/backend.rs"
 
 [workspace]
-members = [
-    "crates/cli",
-    "crates/common",
-    "crates/compiler",
-    "crates/host-impl",
-    "crates/rust-sdk",
-    "crates/rust-sdk-macro",
-    "crates/worker",
-    "examples/rust-basic",
-    "examples/rust-fetch",
-]
+members = ["crates/*", "examples/rust-basic", "examples/rust-fetch"]
 
 [workspace.dependencies]
 anyhow = "1.0.68"
