@@ -13,6 +13,8 @@ pub mod http {
     pub type Error = fetch::HttpError;
 }
 
+pub mod kv;
+
 // Re-export leaf_sdk_macro,
 // make all functions in leaf_sdk
 pub use leaf_sdk_macro::http_main;

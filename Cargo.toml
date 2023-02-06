@@ -54,7 +54,12 @@ name = "leaf-backend"
 path = "src/backend.rs"
 
 [workspace]
-members = ["crates/*", "examples/rust-basic", "examples/rust-fetch"]
+members = [
+    "crates/*",
+    "examples/rust-basic",
+    "examples/rust-fetch",
+    "examples/rust-kv",
+]
 
 [workspace.dependencies]
 anyhow = "1.0.68"

@@ -291,7 +291,11 @@ impl Test {
         };
 
         let resp = worker.handle_request(req).await.unwrap();
-        println!("{:?}", resp);
+        println!("resp: {:?}", resp);
+        println!(
+            "body: {:?}",
+            std::str::from_utf8(&resp.body.unwrap()).unwrap()
+        );
 
         Ok(())
     }

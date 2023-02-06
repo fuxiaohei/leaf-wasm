@@ -78,6 +78,9 @@ impl Worker {
         leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
             Error::InstantiateWasmComponent(e, "leaf_host_impl::http::add_to_linker".to_string())
         })?;
+        leaf_host_impl::kv::add_to_linker(&mut linker, Context::kv).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "leaf_host_impl::kv::add_to_linker".to_string())
+        })?;
         if self.enable_wasi {
             wasi_host::add_to_linker(&mut linker, Context::wasi).map_err(|e| {
                 Error::InstantiateWasmComponent(e, "wasi_host::add_to_linker".to_string())
@@ -104,10 +107,14 @@ impl Worker {
     /// If this worker enable wasi, use instance_pre to initialize the worker.
     fn create_instance_pre(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
+        
         // create linker
         let mut linker: Linker<Context> = Linker::new(&self.engine);
         leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
             Error::InstantiateWasmComponent(e, "leaf_host_impl::http::add_to_linker".to_string())
+        })?;
+        leaf_host_impl::kv::add_to_linker(&mut linker, Context::kv).map_err(|e| {
+            Error::InstantiateWasmComponent(e, "leaf_host_impl::kv::add_to_linker".to_string())
         })?;
         wasi_host::add_to_linker(&mut linker, Context::wasi).map_err(|e| {
             Error::InstantiateWasmComponent(e, "wasi_host::add_to_linker".to_string())

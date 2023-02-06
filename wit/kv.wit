@@ -1,0 +1,21 @@
+interface kv-imports{
+    // operation result
+    enum op-result {
+        success,
+        error,
+    }
+
+    // set kv value
+    set: func(key:string, value:string, ttl:u32) -> op-result
+
+    // get kv value
+    get: func(key:string) -> result<string, op-result>
+
+    // list kv value
+    list-values: func() -> result<list<string>, op-result>
+}
+
+// world imports and exports
+default world kv{
+    import kv-imports: self.kv-imports
+}
