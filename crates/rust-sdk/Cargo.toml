@@ -9,4 +9,5 @@ anyhow = { workspace = true }
 bytes = { workspace = true }
 http = { workspace = true }
 leaf-sdk-macro = { path = "../rust-sdk-macro" }
+leaf-host-kv = { path = "../host-impl/kv" }
 wit-bindgen-guest-rust = { workspace = true }

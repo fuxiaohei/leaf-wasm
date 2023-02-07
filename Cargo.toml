@@ -56,6 +56,7 @@ path = "src/backend.rs"
 [workspace]
 members = [
     "crates/*",
+    "crates/host-impl/kv",
     "examples/rust-basic",
     "examples/rust-fetch",
     "examples/rust-kv",

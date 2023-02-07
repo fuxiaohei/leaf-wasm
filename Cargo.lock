@@ -1595,10 +1595,20 @@ version = "0.1.20"
 dependencies = [
  "anyhow",
  "async-trait",
+ "leaf-host-kv",
  "reqwest",
  "tokio",
  "tracing",
  "wasmtime",
+]
+
+[[package]]
+name = "leaf-host-kv"
+version = "0.1.20"
+dependencies = [
+ "async-trait",
+ "time",
+ "tokio",
 ]
 
 [[package]]
@@ -1627,6 +1637,7 @@ dependencies = [
  "anyhow",
  "bytes",
  "http",
+ "leaf-host-kv",
  "leaf-sdk-macro",
  "wit-bindgen-guest-rust",
 ]
