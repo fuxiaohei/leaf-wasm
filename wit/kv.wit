@@ -3,6 +3,8 @@ interface kv-imports{
     enum op-result {
         success,
         error,
+        not-exist,
+        expired,
     }
 
     // set kv value
@@ -11,8 +13,11 @@ interface kv-imports{
     // get kv value
     get: func(key:string) -> result<string, op-result>
 
+    // delete kv value
+    delete: func(key:string) -> op-result
+
     // list kv value
-    list-values: func() -> result<list<string>, op-result>
+    list-values: func() -> result<list<tuple<string,string>>, op-result>
 }
 
 // world imports and exports

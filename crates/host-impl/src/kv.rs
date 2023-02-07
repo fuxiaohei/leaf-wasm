@@ -21,6 +21,10 @@ impl KvImpl {
             namespace,
         }
     }
+    /// build key with uuid and namespace
+    fn build_key(&self, key: &str) -> String {
+        format!("{}:{}:{}", self.user_uuid, self.namespace, key)
+    }
 }
 
 #[async_trait]
@@ -36,8 +40,13 @@ impl kv_imports::KvImports for KvImpl {
     }
 
     /// list_values lists all key-value pairs in the key-value store.
-    async fn list_values(&mut self) -> anyhow::Result<Result<Vec<String>, OpResult>> {
-        Ok(Ok(vec!["key1,value1".to_string()]))
+    async fn list_values(&mut self) -> anyhow::Result<Result<Vec<(String, String)>, OpResult>> {
+        Ok(Ok(vec![("key1".to_string(), "value1".to_string())]))
+    }
+
+    /// delete deletes a key-value pair from the key-value store.
+    async fn delete(&mut self, key: String) -> anyhow::Result<OpResult> {
+        Ok(OpResult::Success)
     }
 }
 

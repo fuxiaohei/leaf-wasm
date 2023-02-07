@@ -1,14 +1,12 @@
 [package]
-name = "leaf-host-impl"
+name = "leaf-host-kv"
 version = { workspace = true }
 authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-anyhow = { workspace = true }
 async-trait = { workspace = true }
-reqwest = { workspace = true }
+time = "0.3.17"
+
+[dev-dependencies]
 tokio = { workspace = true }
-tracing = { workspace = true }
-wasmtime = { workspace = true }
-leaf-host-kv = { path = "./kv" }
