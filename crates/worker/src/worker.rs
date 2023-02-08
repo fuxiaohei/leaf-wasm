@@ -1,6 +1,7 @@
 use super::Context;
 use leaf_common::errors::Error;
 use leaf_host_impl::http::{HttpHandler, Request as LeafRequest, Response as LeafResponse};
+use leaf_host_kv::Memory;
 use tokio::time::Instant;
 use tracing::info;
 use wasmtime::{
@@ -72,7 +73,7 @@ impl Worker {
     /// If the worker is trapped, it needs re-create instance.
     async fn create_instance(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
-        let ctx = Context::new(0);
+        let ctx = Context::new(0, Box::new(Memory::new()));
         let mut store = Store::new(&self.engine, ctx);
         let mut linker: Linker<Context> = Linker::new(&self.engine);
         leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
@@ -107,7 +108,7 @@ impl Worker {
     /// If this worker enable wasi, use instance_pre to initialize the worker.
     fn create_instance_pre(&mut self) -> Result<(), Error> {
         let start_time = Instant::now();
-        
+
         // create linker
         let mut linker: Linker<Context> = Linker::new(&self.engine);
         leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
@@ -153,7 +154,7 @@ impl Worker {
         &mut self,
         req: LeafRequest<'_>,
     ) -> Result<LeafResponse, Error> {
-        let context = Context::new(req.request_id);
+        let context = Context::new(req.request_id, Box::new(Memory::new()));
         let mut store = Store::new(&self.engine, context);
         let instance = self
             .instance_pre

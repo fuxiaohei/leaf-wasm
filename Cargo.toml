@@ -16,13 +16,13 @@ async-trait = { workspace = true }
 clap = { workspace = true }
 hyper = { workspace = true }
 lazy_static = "1.4.0"
+leaf-backend = { path = "./crates/backend" }
 leaf-cli = { path = "./crates/cli" }
 leaf-common = { path = "./crates/common" }
 leaf-compiler = { path = "./crates/compiler" }
 leaf-host-impl = { path = "./crates/host-impl" }
 leaf-runner = { path = "./crates/runner" }
 leaf-worker = { path = "./crates/worker" }
-leaf-backend = { path = "./crates/backend" }
 reqwest = { workspace = true }
 thiserror = { workspace = true }
 time = "0.3.17"

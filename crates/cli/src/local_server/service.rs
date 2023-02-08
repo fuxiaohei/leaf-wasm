@@ -5,7 +5,6 @@ use hyper::{
 use leaf_common::errors::Error;
 use leaf_host_impl::http::{Request as LeafRequest, Response as LeafResponse};
 use leaf_worker::{Manager, Pool};
-use once_cell::sync::OnceCell;
 use std::sync::{atomic::AtomicU64, Arc};
 use std::{
     convert::Infallible,
@@ -16,10 +15,9 @@ use std::{
 use tokio::time::Instant;
 use tracing::{info, warn};
 
-static POOL: OnceCell<Pool> = OnceCell::new();
-
 pub struct ServiceContext {
-    pub req_id: Arc<AtomicU64>,
+    req_id: Arc<AtomicU64>,
+    worker_pool: Arc<Pool>,
 }
 
 impl Service<Request<Body>> for ServiceContext {
@@ -35,10 +33,10 @@ impl Service<Request<Body>> for ServiceContext {
         let req_id = self
             .req_id
             .fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let worker_pool = self.worker_pool.clone();
         let fut = async move {
             let st = Instant::now();
-            let pool = POOL.get().unwrap();
-            let mut worker = match pool.get().await {
+            let mut worker = match worker_pool.get().await {
                 Ok(pool) => pool,
                 Err(e) => {
                     warn!(
@@ -123,7 +121,8 @@ fn create_error_response(status: StatusCode, message: String) -> Response<Body> 
 }
 
 pub struct ServerContext {
-    pub req_id: Arc<AtomicU64>,
+    req_id: Arc<AtomicU64>,
+    worker_pool: Arc<Pool>,
 }
 
 impl ServerContext {
@@ -132,14 +131,10 @@ impl ServerContext {
         let pool = Pool::builder(mgr)
             .build()
             .map_err(|e| Error::InitComponentManagerPool(anyhow::anyhow!(e)))?;
-        match POOL.set(pool) {
-            Ok(_) => Ok(Self {
-                req_id: Arc::new(AtomicU64::new(1)),
-            }),
-            Err(_) => Err(Error::InitComponentManagerPool(anyhow::anyhow!(
-                "Failed to set pool"
-            ))),
-        }
+        Ok(Self {
+            req_id: Arc::new(AtomicU64::new(1)),
+            worker_pool: Arc::new(pool),
+        })
     }
 }
 
@@ -154,6 +149,10 @@ impl<'addr> Service<&'addr AddrStream> for ServerContext {
 
     fn call(&mut self, _addr: &'addr AddrStream) -> Self::Future {
         let req_id = self.req_id.clone();
-        future::ok(ServiceContext { req_id })
+        let worker_pool = self.worker_pool.clone();
+        future::ok(ServiceContext {
+            req_id,
+            worker_pool,
+        })
     }
 }
