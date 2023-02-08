@@ -22,3 +22,6 @@ pub trait Provider: Send {
 
 mod memory;
 pub use memory::Memory;
+
+mod dummy;
+pub use dummy::Dummy;

@@ -1560,6 +1560,7 @@ dependencies = [
  "leaf-common",
  "leaf-compiler",
  "leaf-host-impl",
+ "leaf-host-kv",
  "leaf-worker",
  "once_cell",
  "reqwest",
@@ -1613,6 +1614,7 @@ name = "leaf-host-kv"
 version = "0.1.20"
 dependencies = [
  "async-trait",
+ "once_cell",
  "time",
  "tokio",
 ]

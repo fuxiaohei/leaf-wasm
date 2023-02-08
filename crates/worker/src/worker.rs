@@ -1,7 +1,7 @@
 use super::Context;
 use leaf_common::errors::Error;
 use leaf_host_impl::http::{HttpHandler, Request as LeafRequest, Response as LeafResponse};
-use leaf_host_kv::Memory;
+use leaf_host_kv::{Memory, Provider};
 use tokio::time::Instant;
 use tracing::info;
 use wasmtime::{
@@ -37,7 +37,11 @@ impl std::fmt::Debug for Worker {
 }
 
 impl Worker {
-    pub async fn new(path: &str, enable_wasi: bool) -> Result<Self, Error> {
+    pub async fn new(
+        path: &str,
+        enable_wasi: bool,
+        kv: impl Provider + 'static,
+    ) -> Result<Self, Error> {
         let start_time = Instant::now();
         let config = create_wasmtime_config();
         let engine = Engine::new(&config).map_err(Error::InitEngine)?;
@@ -58,7 +62,7 @@ impl Worker {
         if worker.enable_wasi {
             worker.create_instance_pre()?;
         } else {
-            worker.create_instance().await?;
+            worker.create_instance(kv).await?;
         }
 
         info!(
@@ -71,9 +75,9 @@ impl Worker {
     }
 
     /// If the worker is trapped, it needs re-create instance.
-    async fn create_instance(&mut self) -> Result<(), Error> {
+    async fn create_instance(&mut self, kv: impl Provider + 'static) -> Result<(), Error> {
         let start_time = Instant::now();
-        let ctx = Context::new(0, Box::new(Memory::new()));
+        let ctx = Context::new(0, Box::new(kv));
         let mut store = Store::new(&self.engine, ctx);
         let mut linker: Linker<Context> = Linker::new(&self.engine);
         leaf_host_impl::http::add_to_linker(&mut linker, Context::fetch).map_err(|e| {
@@ -201,7 +205,9 @@ async fn run_wasm_worker_test() {
 
     let sample_wasm_file = "../../tests/sample.wasm";
 
-    let mut worker = Worker::new(sample_wasm_file, false).await.unwrap();
+    let mut worker = Worker::new(sample_wasm_file, false, Memory::new())
+        .await
+        .unwrap();
 
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
@@ -237,7 +243,9 @@ async fn run_wasi_worker_test() {
     // TODO: use real wasi wasm file
     let sample_wasm_file = "../../tests/sample.wasm";
 
-    let mut worker = Worker::new(sample_wasm_file, true).await.unwrap();
+    let mut worker = Worker::new(sample_wasm_file, true, Memory::new())
+        .await
+        .unwrap();
 
     for _ in 1..10 {
         let headers: Vec<(&str, &str)> = vec![];
