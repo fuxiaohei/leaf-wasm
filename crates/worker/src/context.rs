@@ -1,4 +1,5 @@
 use leaf_host_impl::{http::FetchImpl, kv::KvImpl};
+use leaf_host_kv::Provider;
 use wasi_host::WasiCtx;
 use wasi_host_cap_std_sync::WasiCtxBuilder;
 
@@ -18,12 +19,12 @@ impl Context {
     pub fn kv(&mut self) -> &mut KvImpl {
         &mut self.kv
     }
-    pub fn new(req_id: u64) -> Self {
+    pub fn new(req_id: u64, kv: Box<dyn Provider>) -> Self {
         let wasi = WasiCtxBuilder::new().inherit_stdio().build();
         Self {
             wasi,
             fetch: FetchImpl::new(req_id),
-            kv: KvImpl::new("uuid".to_string(), "ns".to_string()),
+            kv: KvImpl::new("uuid".to_string(), "ns".to_string(), kv),
         }
     }
 }

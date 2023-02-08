@@ -1691,6 +1691,7 @@ dependencies = [
  "host",
  "leaf-common",
  "leaf-host-impl",
+ "leaf-host-kv",
  "thiserror",
  "tokio",
  "tracing",

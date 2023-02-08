@@ -8,7 +8,7 @@ pub struct Memory {
 }
 
 impl Memory {
-    fn new() -> Self {
+    pub fn new() -> Self {
         Memory {
             data: HashMap::new(),
         }

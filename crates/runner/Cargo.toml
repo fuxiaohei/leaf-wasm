@@ -5,16 +5,16 @@ authors = { workspace = true }
 edition = { workspace = true }
 
 [dependencies]
-tracing = { workspace = true }
+anyhow = { workspace = true }
 futures = { workspace = true }
 hyper = { workspace = true }
-tokio = { workspace = true }
-leaf-worker = { path = "../worker" }
+lazy_static = "1.4.0"
 leaf-host-impl = { path = "../host-impl" }
+leaf-worker = { path = "../worker" }
 matchit = "0.7.0"
 mini-moka = "0.10.0"
-anyhow = { workspace = true }
-toml = { workspace = true }
 serde = "1.0.152"
 serde_derive = "1.0.152"
-lazy_static = "1.4.0"
+tokio = { workspace = true }
+toml = { workspace = true }
+tracing = { workspace = true }

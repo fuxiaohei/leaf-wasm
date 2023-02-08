@@ -8,8 +8,9 @@ edition = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
 deadpool = { version = "0.9.5", features = ["rt_tokio_1"] }
-leaf-host-impl = { path = "../host-impl" }
 leaf-common = { path = "../common" }
+leaf-host-impl = { path = "../host-impl" }
+leaf-host-kv = { path = "../host-impl/kv" }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }

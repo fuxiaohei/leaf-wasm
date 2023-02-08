@@ -13,7 +13,7 @@ pub enum Error {
 
 /// Provider is the interface for a key-value store.
 #[async_trait::async_trait]
-pub trait Provider {
+pub trait Provider: Send {
     async fn get(&mut self, key: String) -> Result<String, Error>;
     async fn set(&mut self, key: String, value: String, ttl: u32) -> Result<(), Error>;
     async fn delete(&mut self, key: String) -> Result<(), Error>;
@@ -21,3 +21,4 @@ pub trait Provider {
 }
 
 mod memory;
+pub use memory::Memory;
