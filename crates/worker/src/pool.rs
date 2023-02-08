@@ -1,6 +1,7 @@
 use super::Worker;
 use async_trait::async_trait;
 use deadpool::managed;
+use leaf_host_kv::Memory as MemoryKv;
 
 #[derive(Debug)]
 pub struct Manager {
@@ -20,7 +21,7 @@ impl managed::Manager for Manager {
     type Error = leaf_common::errors::Error;
 
     async fn create(&self) -> Result<Self::Type, Self::Error> {
-        Ok(Worker::new(&self.path, self.enable_wasi).await?)
+        Ok(Worker::new(&self.path, self.enable_wasi, MemoryKv::new()).await?)
     }
 
     async fn recycle(&self, _obj: &mut Self::Type) -> managed::RecycleResult<Self::Error> {

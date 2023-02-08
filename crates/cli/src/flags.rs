@@ -4,6 +4,7 @@ use anyhow::Result;
 use clap::Args;
 use leaf_common::vars::*;
 use leaf_common::Manifest;
+use leaf_host_kv::Dummy as DummyKv;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use tracing::{debug, error, info, warn};
@@ -279,7 +280,7 @@ impl Test {
             }
         };
 
-        let mut worker = leaf_worker::Worker::new(&wasm_file, enable_wasi).await?;
+        let mut worker = leaf_worker::Worker::new(&wasm_file, enable_wasi, DummyKv::new()).await?;
 
         let headers: Vec<(&str, &str)> = vec![];
         let req = leaf_host_impl::http::Request {

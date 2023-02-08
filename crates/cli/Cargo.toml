@@ -12,6 +12,7 @@ hyper = { workspace = true }
 leaf-common = { path = "../common" }
 leaf-compiler = { path = "../compiler" }
 leaf-host-impl = { path = "../host-impl" }
+leaf-host-kv = { path = "../host-impl/kv" }
 leaf-worker = { path = "../worker" }
 once_cell = "1.17.0"
 rust-embed = "6.4.2"
