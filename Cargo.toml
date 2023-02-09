@@ -12,4 +12,4 @@ edition = "2021"
 [dependencies]
 
 [workspace]
-members = ["src/bin"]
+members = ["src/bin", "src/common"]
