@@ -26,7 +26,7 @@ pub struct Manifest {
 impl Manifest {
     /// read manifest from toml file
     pub fn from_file(path: &str) -> Result<Self> {
-        let content = std::fs::read_to_string(path).unwrap();
+        let content = std::fs::read_to_string(path)?;
         let manifest: Manifest = toml::from_str(&content)?;
         Ok(manifest)
     }

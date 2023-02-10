@@ -11,3 +11,7 @@ doctest = false
 anyhow = "1.0.69"
 serde = { version = "1.0.152", features = ["derive"] }
 toml = "0.7.2"
+wit-bindgen-core = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a9840311a451c2b1bb7c5091f956e0cfd84e2ce0" }
+wit-bindgen-gen-guest-rust = { git = "https://github.com/bytecodealliance/wit-bindgen", rev = "a9840311a451c2b1bb7c5091f956e0cfd84e2ce0" }
+wit-component = "0.5.1"
+wit-parser = "0.5.0"

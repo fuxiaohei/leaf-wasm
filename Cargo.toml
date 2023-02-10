@@ -11,5 +11,8 @@ edition = "2021"
 
 [dependencies]
 
+[build-dependencies]
+common = { path = "src/common" }
+
 [workspace]
-members = ["src/bin", "src/common"]
+members = ["sdk/rust", "src/bin", "src/common"]

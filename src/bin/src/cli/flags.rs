@@ -1,6 +1,19 @@
 use clap::{Args, Parser};
+use common::manifest::Manifest;
 use std::net::SocketAddr;
-use tracing::Instrument;
+use tracing::{info, Instrument};
+
+const DEFAULT_MANIFEST_FILE: &str = "manifest.toml";
+
+fn must_read_manifest(path: &str) -> Manifest {
+    let manifest = Manifest::from_file(path)
+        .map_err(|e| {
+            tracing::error!("read manifest file failed: {}", e);
+            std::process::exit(1);
+        })
+        .unwrap();
+    manifest
+}
 
 /// Leaf Command line
 #[derive(Parser)]
@@ -50,6 +63,16 @@ pub struct Serve {
 
 impl Serve {
     pub async fn run(&self) {
+        // 1. load manifest file
+        let filename = DEFAULT_MANIFEST_FILE;
+        let entered = tracing::error_span!("[Manifest]", manifest = filename).entered();
+        let manifest = must_read_manifest(filename);
+        info!("manifest: {:?}", manifest);
+
+        // 2. get target wasm file
+        entered.exit();
+
+        // 3. start local http server
         super::server::start(self.addr.unwrap())
             .instrument(tracing::info_span!("[Server]"))
             .await
