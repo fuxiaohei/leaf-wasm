@@ -15,4 +15,4 @@ edition = "2021"
 common = { path = "src/common" }
 
 [workspace]
-members = ["sdk/rust", "src/bin", "src/common"]
+members = ["sdk/rust", "sdk/rust/macro", "src/bin", "src/common"]

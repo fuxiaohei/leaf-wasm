@@ -12,5 +12,4 @@ pub mod http {
     }
 }
 
-
 mod http_handler;
