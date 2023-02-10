@@ -1,7 +1,8 @@
 use clap::{Args, Parser};
 use common::manifest::Manifest;
 use std::net::SocketAddr;
-use tracing::{info, Instrument};
+use tracing::Instrument;
+use tracing::{debug, info};
 
 const DEFAULT_MANIFEST_FILE: &str = "manifest.toml";
 
@@ -67,7 +68,8 @@ impl Serve {
         let filename = DEFAULT_MANIFEST_FILE;
         let entered = tracing::error_span!("[Manifest]", manifest = filename).entered();
         let manifest = must_read_manifest(filename);
-        info!("manifest: {:?}", manifest);
+        debug!("manifest: {:?}", manifest);
+        info!("manifest load ok");
 
         // 2. get target wasm file
         entered.exit();

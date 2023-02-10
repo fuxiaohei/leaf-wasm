@@ -351,6 +351,7 @@ dependencies = [
  "common",
  "http-body-util",
  "hyper",
+ "time",
  "tokio",
  "tracing",
  "tracing-subscriber",
@@ -358,16 +359,25 @@ dependencies = [
 
 [[package]]
 name = "leaf-sdk"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "anyhow",
  "bytes",
  "http",
+ "leaf-sdk-macro",
+ "wit-bindgen-guest-rust",
 ]
 
 [[package]]
 name = "leaf-sdk-macro"
-version = "0.1.0"
+version = "0.2.0"
+dependencies = [
+ "anyhow",
+ "bytes",
+ "http",
+ "quote",
+ "syn",
+]
 
 [[package]]
 name = "leaf-wasm"
@@ -411,6 +421,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "abb12e687cfb44aa40f41fc3978ef76448f9b6038cad6aef4259d3c095a2382e"
 dependencies = [
  "cfg-if",
+]
+
+[[package]]
+name = "matchers"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
+dependencies = [
+ "regex-automata",
 ]
 
 [[package]]
@@ -589,6 +608,30 @@ checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
 dependencies = [
  "bitflags",
 ]
+
+[[package]]
+name = "regex"
+version = "1.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "48aaa5748ba571fb95cd2c85c09f629215d3a6ece942baa100950af03a34f733"
+dependencies = [
+ "regex-syntax",
+]
+
+[[package]]
+name = "regex-automata"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c230d73fb8d8c1b9c0b3135c5142a8acee3a0558fb8db5cf1cb65f8d7862132"
+dependencies = [
+ "regex-syntax",
+]
+
+[[package]]
+name = "regex-syntax"
+version = "0.6.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "456c603be3e8d448b072f410900c09faf164fbce2d480456f50eea6e25f9c848"
 
 [[package]]
 name = "rustix"
@@ -891,11 +934,15 @@ version = "0.3.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6176eae26dd70d0c919749377897b54a9276bd7061339665dd68777926b5a70"
 dependencies = [
+ "matchers",
  "nu-ansi-term",
+ "once_cell",
+ "regex",
  "sharded-slab",
  "smallvec",
  "thread_local",
  "time",
+ "tracing",
  "tracing-core",
  "tracing-log",
 ]
@@ -1159,6 +1206,28 @@ source = "git+https://github.com/bytecodealliance/wit-bindgen?rev=a9840311a451c2
 dependencies = [
  "heck",
  "wit-bindgen-core",
+]
+
+[[package]]
+name = "wit-bindgen-guest-rust"
+version = "0.3.0"
+source = "git+https://github.com/bytecodealliance/wit-bindgen?rev=a9840311a451c2b1bb7c5091f956e0cfd84e2ce0#a9840311a451c2b1bb7c5091f956e0cfd84e2ce0"
+dependencies = [
+ "bitflags",
+ "wit-bindgen-guest-rust-macro",
+]
+
+[[package]]
+name = "wit-bindgen-guest-rust-macro"
+version = "0.3.0"
+source = "git+https://github.com/bytecodealliance/wit-bindgen?rev=a9840311a451c2b1bb7c5091f956e0cfd84e2ce0#a9840311a451c2b1bb7c5091f956e0cfd84e2ce0"
+dependencies = [
+ "anyhow",
+ "proc-macro2",
+ "syn",
+ "wit-bindgen-core",
+ "wit-bindgen-gen-guest-rust",
+ "wit-component",
 ]
 
 [[package]]

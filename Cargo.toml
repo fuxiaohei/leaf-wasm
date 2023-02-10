@@ -16,3 +16,6 @@ common = { path = "src/common" }
 
 [workspace]
 members = ["sdk/rust", "sdk/rust/macro", "src/bin", "src/common"]
+
+[lib]
+doctest = false

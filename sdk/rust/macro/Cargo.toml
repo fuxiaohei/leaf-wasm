@@ -1,8 +1,17 @@
 [package]
 name = "leaf-sdk-macro"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
 
 [dependencies]
+anyhow = "1.0.69"
+bytes = "1.4.0"
+http = "0.2.8"
+quote = "1.0.23"
+syn = { version = "1.0.107", features = ["full"] }
+
+[lib]
+proc-macro = true
+test = false
+doctest = false
